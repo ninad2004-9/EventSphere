@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventSphere — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06060a; --surface:#0f0f17; --surface2:#17171f;
+  --border:rgba(255,255,255,0.07); --accent:#ff5c35; --purple:#7c3aed;
+  --gold:#f59e0b; --text:#f0f0f5; --muted:#6b6b80; --glow:rgba(255,92,53,0.28);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
+
+/* ── LEFT PANEL ── */
+.left{width:52%;position:relative;background:var(--surface);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:80px;overflow:hidden;}
+.left::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 80% 40%,rgba(124,58,237,.18) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 10% 90%,rgba(255,92,53,.12) 0%,transparent 60%);}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%);}
+.brand{position:relative;z-index:1;margin-bottom:56px;}
+.logo{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;background:linear-gradient(135deg,#ff5c35,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.04em;margin-bottom:10px;}
+.brand-sub{font-size:.75rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+.left-content{position:relative;z-index:1;}
+.left-content h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,3.8vw,3.6rem);font-weight:800;line-height:1.06;letter-spacing:-.04em;margin-bottom:18px;}
+.left-content h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.left-content p{color:var(--muted);font-size:.95rem;line-height:1.75;max-width:380px;margin-bottom:44px;}
+.previews{display:flex;flex-direction:column;gap:11px;}
+.preview{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:13px;padding:13px 17px;animation:slideLeft .6s ease both;}
+.preview:nth-child(1){animation-delay:.7s}.preview:nth-child(2){animation-delay:.9s}.preview:nth-child(3){animation-delay:1.1s}
+@keyframes slideLeft{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+.p-emoji{font-size:1.75rem;}
+.p-info{flex:1;}
+.p-name{font-weight:600;font-size:.88rem;margin-bottom:3px;}
+.p-date{font-size:.72rem;color:var(--muted);}
+.p-price{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);font-size:.92rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── RIGHT PANEL ── */
+.right{width:48%;display:flex;align-items:center;justify-content:center;padding:40px 60px;background:var(--bg);overflow-y:auto;}
+.form-box{width:100%;max-width:420px;padding:16px 0;}
+
+/* ── ROLE TOGGLE ── */
+.role-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:28px;animation:fadeUp .5s .15s ease both;}
+.rtab{flex:1;padding:10px 8px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.rtab.on{background:var(--accent);color:#fff;box-shadow:0 4px 20px var(--glow);}
+.rtab:not(.on):hover{color:var(--text);}
+body.adm .rtab.on{background:var(--purple);box-shadow:0 4px 20px rgba(124,58,237,.35);}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.on{display:block;animation:fadeUp .32s ease;}
+
+/* ── FORM HEADER ── */
+.fhead{margin-bottom:22px;}
+.fhead h2{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
+.fhead p{color:var(--muted);font-size:.875rem;line-height:1.65;}
+
+/* ── INPUTS ── */
+.fg{margin-bottom:15px;}
+.fg label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.iw{position:relative;}
+.ii{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.95rem;pointer-events:none;}
+input[type=text],input[type=email],input[type=password]{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 14px 12px 41px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:all .3s;}
+input:focus{border-color:rgba(255,92,53,.5);box-shadow:0 0 0 3px rgba(255,92,53,.09);}
+body.adm input:focus{border-color:rgba(124,58,237,.5);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+input::placeholder{color:var(--muted);}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);background:none;border:none;font-size:.95rem;transition:color .2s;padding:2px;}
+.eye:hover{color:var(--text);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── PASSWORD STRENGTH ── */
+.pw-str{margin-top:6px;display:none;}
+.pw-str.on{display:block;}
+.str-bars{display:flex;gap:4px;margin-bottom:4px;}
+.sb{height:3px;flex:1;border-radius:2px;background:var(--border);transition:background .3s;}
+.str-lbl{font-size:.68rem;}
+
+/* ── ALERTS ── */
+.alert{padding:11px 13px;border-radius:9px;font-size:.835rem;margin-bottom:14px;display:none;align-items:center;gap:8px;line-height:1.4;}
+.alert.on{display:flex;animation:shake .35s ease;}
+.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);color:#f87171;}
+.a-ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.28);color:#34d399;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+
+/* ── FORM EXTRAS ── */
+.extras{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.rem{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;color:var(--muted);}
+.rem input{width:auto;padding:0;}
+.forgot{font-size:.85rem;color:var(--accent);text-decoration:none;transition:opacity .2s;}
+.forgot:hover{opacity:.7;}
+body.adm .forgot{color:#a78bfa;}
+
+/* ── SUBMIT BUTTON ── */
+.sbtn{width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:9px;position:relative;overflow:hidden;}
+.sbtn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent);opacity:0;transition:opacity .3s;}
+.sbtn:hover{transform:translateY(-2px);box-shadow:0 12px 34px var(--glow);}
+.sbtn:hover::after{opacity:1;}
+.sbtn:disabled{opacity:.65;cursor:not-allowed;transform:none;}
+.sbtn.purple{background:var(--purple);}
+.sbtn.purple:hover{box-shadow:0 12px 34px rgba(124,58,237,.35);}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SWITCH LINK ── */
+.swlink{text-align:center;margin-top:18px;font-size:.86rem;color:var(--muted);}
+.swlink a{color:var(--accent);text-decoration:none;font-weight:600;cursor:pointer;}
+.swlink a:hover{text-decoration:underline;}
+body.adm .swlink a{color:#a78bfa;}
+
+/* ── TERMS ── */
+.terms{display:flex;align-items:flex-start;gap:9px;margin-bottom:15px;}
+.terms input{margin-top:3px;width:auto;padding:0;flex-shrink:0;}
+.terms label{font-size:.78rem;color:var(--muted);text-transform:none;letter-spacing:0;cursor:pointer;}
+.terms a{color:var(--accent);}
+
+/* ── ADMIN NOTE ── */
+.adm-note{margin-top:18px;padding:13px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:10px;font-size:.76rem;color:var(--muted);text-align:center;line-height:1.7;}
+
+/* ── SMALL HINT ── */
+.hint{font-size:.7rem;margin-top:5px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){body{flex-direction:column}.left{display:none}.right{width:100%;padding:32px 20px}}
+</style>
+</head>
+<body id="B">
+
+<!-- LEFT -->
+<div class="left">
+  <div class="grid-bg"></div>
+  <div class="brand">
+    <div class="logo">EventSphere</div>
+    <div class="brand-sub">Discover · Book · Experience</div>
+  </div>
+  <div class="left-content">
+    <h1>Your Next<br>Great Experience<br><em>Starts Here</em></h1>
+    <p>Join 380,000+ event‑goers. Register free and never miss the moments that matter most.</p>
+    <div class="previews">
+      <div class="preview"><div class="p-emoji">🎵</div><div class="p-info"><div class="p-name">Neon Nights Music Fest</div><div class="p-date">Nov 22 · Mumbai</div></div><div class="p-price">₹2,499</div><div class="dot"></div></div>
+      <div class="preview"><div class="p-emoji">💻</div><div class="p-info"><div class="p-name">TechFusion Summit 2026</div><div class="p-date">Dec 5 · Bangalore</div></div><div class="p-price">₹3,999</div><div class="dot"></div></div>
+      <div class="preview"><div class="p-emoji">🎸</div><div class="p-info"><div class="p-name">Rock Legends Concert</div><div class="p-date">Dec 28 · Mumbai</div></div><div class="p-price">₹1,999</div><div class="dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="form-box">
+
+    <!-- Role Toggle -->
+    <div class="role-toggle">
+      <button class="rtab on" id="uTab" onclick="setRole('user')">👤 User</button>
+      <button class="rtab" id="aTab" onclick="setRole('admin')">🛡️ Admin</button>
+    </div>
+
+    <!-- ═══ USER SECTION ═══ -->
+    <div id="secUser">
+
+      <!-- LOGIN -->
+      <div class="view on" id="vLogin">
+        <div class="fhead"><h2>Welcome back</h2><p>Sign in to discover and book events.</p></div>
+        <div class="alert a-err" id="lErr"><span>⚠</span><span id="lErrT"></span></div>
+
+        <div class="fg"><label>Email Address</label>
+          <div class="iw"><span class="ii">✉</span><input type="email" id="lEmail" placeholder="you@example.com"></div>
+        </div>
+        <div class="fg"><label>Password</label>
+          <div class="iw"><span class="ii">🔒</span><input type="password" id="lPw" placeholder="Your password"><button class="eye" onclick="tog('lPw',this)">👁</button></div>
+        </div>
+        <div class="extras">
+          <label class="rem"><input type="checkbox"> Remember me</label>
+          <a href="#" class="forgot">Forgot password?</a>
+        </div>
+        <button class="sbtn" id="lBtn" onclick="doLogin()">
+          <span id="lBtnT">Sign In</span><div class="spinner" id="lSpin"></div><span id="lArr">→</span>
+        </button>
+        <div class="swlink">Don't have an account? <a onclick="sw('register')">Create one free →</a></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="view" id="vReg">
+        <div class="fhead"><h2>Create Account</h2><p>Join EventSphere — it's completely free.</p></div>
+        <div class="alert a-err" id="rErr"><span>⚠</span><span id="rErrT"></span></div>
+        <div class="alert a-ok"  id="rOk"><span>✓</span><span id="rOkT"></span></div>
+
+        <div class="two-col">
+          <div class="fg"><label>First Name</label><div class="iw"><span class="ii">👤</span><input type="text" id="rFN" placeholder="First"></div></div>
+          <div class="fg"><label>Last Name</label><div class="iw"><span class="ii">👤</span><input type="text" id="rLN" placeholder="Last"></div></div>
+        </div>
+        <div class="fg"><label>Email Address</label>
+          <div class="iw"><span class="ii">✉</span><input type="email" id="rEmail" placeholder="you@example.com" oninput="chkEmail(this.value)"></div>
+          <div class="hint" id="emailHint"></div>
+        </div>
+        <div class="fg"><label>Password</label>
+          <div class="iw"><span class="ii">🔒</span><input type="password" id="rPw" placeholder="Min. 8 characters" oninput="chkStr(this.value)"><button class="eye" onclick="tog('rPw',this)">👁</button></div>
+          <div class="pw-str" id="pwStr">
+            <div class="str-bars"><div class="sb" id="s1"></div><div class="sb" id="s2"></div><div class="sb" id="s3"></div><div class="sb" id="s4"></div></div>
+            <div class="str-lbl" id="strLbl"></div>
+          </div>
+        </div>
+        <div class="fg"><label>Confirm Password</label>
+          <div class="iw"><span class="ii">🔒</span><input type="password" id="rPw2" placeholder="Repeat password" oninput="chkMatch()"><button class="eye" onclick="tog('rPw2',this)">👁</button></div>
+          <div class="hint" id="matchHint"></div>
+        </div>
+        <div class="fg"><label>City</label>
+          <div class="iw"><span class="ii">📍</span><input type="text" id="rCity" placeholder="e.g. Mumbai"></div>
+        </div>
+        <div class="terms">
+          <input type="checkbox" id="terms">
+          <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        <button class="sbtn" id="rBtn" onclick="doReg()">
+          <span id="rBtnT">Create Account</span><div class="spinner" id="rSpin"></div><span id="rArr">→</span>
+        </button>
+        <div class="swlink">Already have an account? <a onclick="sw('login')">Sign In →</a></div>
+      </div>
+
+    </div><!-- /secUser -->
+
+    <!-- ═══ ADMIN SECTION ═══ -->
+    <div id="secAdmin" style="display:none">
+      <div class="fhead"><h2>Admin Portal</h2><p>Restricted access — authorised personnel only.</p></div>
+      <div class="alert a-err" id="aErr"><span>⚠</span><span id="aErrT"></span></div>
+
+      <div class="fg"><label>Admin Email</label>
+        <div class="iw"><span class="ii">✉</span><input type="email" id="aEmail" placeholder="admin@domain.com"></div>
+      </div>
+      <div class="fg"><label>Admin Password</label>
+        <div class="iw"><span class="ii">🔒</span><input type="password" id="aPw" placeholder="Enter admin password"><button class="eye" onclick="tog('aPw',this)">👁</button></div>
+      </div>
+      <div class="extras">
+        <span style="font-size:.76rem;color:var(--muted)">🔐 Secure restricted access</span>
+        <a href="#" style="font-size:.83rem;color:#a78bfa;text-decoration:none">Need help?</a>
+      </div>
+      <button class="sbtn purple" id="aBtn" onclick="doAdmin()">
+        <span id="aBtnT">Access Dashboard</span><div class="spinner" id="aSpin"></div><span id="aArr">→</span>
+      </button>
+      <div class="adm-note">🛡️ Admin accounts are provisioned by the system administrator only.<br>Contact your system admin if you need access.</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// ─── If already logged in, redirect ──────────────────────────────────────────
+if (sessionStorage.getItem('es_token')) {
+  const r = sessionStorage.getItem('es_role');
+  window.location.href = r === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+}
+
+// ─── ROLE SWITCHING ───────────────────────────────────────────────────────────
+let role = 'user';
+function setRole(r) {
+  role = r;
+  const adm = r === 'admin';
+  document.getElementById('uTab').classList.toggle('on', !adm);
+  document.getElementById('aTab').classList.toggle('on',  adm);
+  document.getElementById('B').className = adm ? 'adm' : '';
+  document.getElementById('secUser').style.display  = adm ? 'none'  : 'block';
+  document.getElementById('secAdmin').style.display = adm ? 'block' : 'none';
+  clrAll();
+}
+
+// ─── VIEW SWITCHER (login ↔ register) ─────────────────────────────────────────
+function sw(v) {
+  document.getElementById('vLogin').classList.toggle('on', v === 'login');
+  document.getElementById('vReg').classList.toggle('on',   v === 'register');
+  clrAll();
+}
+
+// ─── ALERT HELPERS ────────────────────────────────────────────────────────────
+function clrAll() {
+  ['lErr','rErr','rOk','aErr'].forEach(id => document.getElementById(id).classList.remove('on'));
+}
+function err(id, msg) { document.getElementById(id+'T').textContent = msg; document.getElementById(id).classList.add('on'); }
+function ok(id, msg)  { document.getElementById(id+'T').textContent = msg; document.getElementById(id).classList.add('on'); }
+
+// ─── TOGGLE PASSWORD VISIBILITY ───────────────────────────────────────────────
+function tog(id, btn) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '👁' : '🙈';
+}
+
+// ─── BUTTON LOADING STATE ─────────────────────────────────────────────────────
+function setLoad(btn, spin, arr, txt, label, loading) {
+  document.getElementById(btn).disabled = loading;
+  document.getElementById(spin).style.display = loading ? 'block' : 'none';
+  document.getElementById(arr).style.display  = loading ? 'none'  : '';
+  document.getElementById(txt).textContent = label;
+}
+
+// ─── PASSWORD STRENGTH ────────────────────────────────────────────────────────
+function chkStr(pw) {
+  const wrap = document.getElementById('pwStr');
+  if (!pw) { wrap.classList.remove('on'); return; }
+  wrap.classList.add('on');
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  const c = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
+  const l = ['Weak','Fair','Good','Strong'];
+  ['s1','s2','s3','s4'].forEach((id,i) => {
+    document.getElementById(id).style.background = i < s ? c[s-1] : 'var(--border)';
+  });
+  const lbl = document.getElementById('strLbl');
+  lbl.textContent = l[s-1] || 'Weak';
+  lbl.style.color = c[s-1] || '#ef4444';
+  chkMatch();
+}
+
+function chkMatch() {
+  const pw  = document.getElementById('rPw').value;
+  const pw2 = document.getElementById('rPw2').value;
+  const el  = document.getElementById('matchHint');
+  if (!pw2) { el.textContent = ''; return; }
+  el.textContent = pw === pw2 ? '✓ Passwords match' : '✗ Passwords do not match';
+  el.style.color  = pw === pw2 ? '#34d399' : '#f87171';
+}
+
+// ─── EMAIL AVAILABILITY (backend check) ───────────────────────────────────────
+let eTmr;
+function chkEmail(v) {
+  clearTimeout(eTmr);
+  const el = document.getElementById('emailHint');
+  if (!v || !v.includes('@')) { el.textContent = ''; return; }
+  eTmr = setTimeout(async () => {
+    try {
+      const data = await apiCall(`/auth/check-email?email=${encodeURIComponent(v)}`);
+      el.textContent = data.available ? '✓ Email available' : '✗ Already registered';
+      el.style.color  = data.available ? '#34d399' : '#f87171';
+    } catch {
+      el.textContent = '';
+    }
+  }, 500);
+}
+
+// ─── USER LOGIN (backend) ─────────────────────────────────────────────────────
+async function doLogin() {
+  clrAll();
+  const email = document.getElementById('lEmail').value.trim();
+  const pw    = document.getElementById('lPw').value;
+  if (!email) { err('lErr','Please enter your email address.'); return; }
+  if (!pw)    { err('lErr','Please enter your password.'); return; }
+  setLoad('lBtn','lSpin','lArr','lBtnT','Signing in…', true);
+  try {
+    const data = await apiCall('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: pw }),
+    });
+    saveSession(data);
+    window.location.href = data.user.role === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+  } catch (e) {
+    err('lErr', e.message || 'Login failed. Please try again.');
+    setLoad('lBtn','lSpin','lArr','lBtnT','Sign In', false);
+  }
+}
+
+// ─── USER REGISTRATION (backend) ──────────────────────────────────────────────
+async function doReg() {
+  clrAll();
+  const fn    = document.getElementById('rFN').value.trim();
+  const ln    = document.getElementById('rLN').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const pw    = document.getElementById('rPw').value;
+  const pw2   = document.getElementById('rPw2').value;
+  const city  = document.getElementById('rCity').value.trim();
+  const terms = document.getElementById('terms').checked;
+  if (!fn || !ln)              { err('rErr','Please enter your full name.'); return; }
+  if (!email||!email.includes('@')){ err('rErr','Please enter a valid email address.'); return; }
+  if (pw.length < 8)           { err('rErr','Password must be at least 8 characters.'); return; }
+  if (pw !== pw2)              { err('rErr','Passwords do not match.'); return; }
+  if (!terms)                  { err('rErr','Please accept the Terms of Service to continue.'); return; }
+  setLoad('rBtn','rSpin','rArr','rBtnT','Creating account…', true);
+  try {
+    await apiCall('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ firstName: fn, lastName: ln, email, password: pw, city }),
+    });
+    setLoad('rBtn','rSpin','rArr','rBtnT','Create Account', false);
+    ok('rOk', `Welcome, ${fn}! Account created. Redirecting to sign in…`);
+    setTimeout(() => { document.getElementById('lEmail').value = email; sw('login'); }, 2200);
+  } catch (e) {
+    err('rErr', e.message || 'Registration failed. Please try again.');
+    setLoad('rBtn','rSpin','rArr','rBtnT','Create Account', false);
+  }
+}
+
+// ─── ADMIN LOGIN (backend — same /login endpoint, role checked server-side) ───
+async function doAdmin() {
+  clrAll();
+  const email = document.getElementById('aEmail').value.trim();
+  const pw    = document.getElementById('aPw').value;
+  if (!email) { err('aErr','Please enter the admin email.'); return; }
+  if (!pw)    { err('aErr','Please enter the admin password.'); return; }
+  setLoad('aBtn','aSpin','aArr','aBtnT','Verifying…', true);
+  try {
+    const data = await apiCall('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: pw }),
+    });
+    if (data.user.role !== 'admin') {
+      err('aErr','Invalid credentials. Access denied.');
+      setLoad('aBtn','aSpin','aArr','aBtnT','Access Dashboard', false);
+      return;
+    }
+    saveSession(data);
+    window.location.href = 'admin-dashboard.html';
+  } catch (e) {
+    err('aErr', e.message || 'Invalid credentials. Access denied.');
+    setLoad('aBtn','aSpin','aArr','aBtnT','Access Dashboard', false);
+  }
+}
+
+// ─── KEYBOARD ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (role === 'admin') { doAdmin(); return; }
+  if (document.getElementById('vLogin').classList.contains('on')) doLogin(); else doReg();
+});
+</script>
+</body>
+</html>

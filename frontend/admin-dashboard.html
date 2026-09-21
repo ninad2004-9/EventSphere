@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventSphere — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070d; --sur:#0f0f1a; --sur2:#161625;
+  --bdr:rgba(255,255,255,0.07); --pur:#7c3aed; --pl:rgba(124,58,237,.14); --pb:rgba(124,58,237,.28);
+  --org:#ff5c35; --gld:#f59e0b; --grn:#10b981; --red:#ef4444;
+  --txt:#f0f0f5; --mut:#6b6b85; --glo:rgba(124,58,237,.28); --sb:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--pur);border-radius:4px;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sb);background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;animation:sIn .5s ease;}
+@keyframes sIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.sl{padding:26px 22px 22px;border-bottom:1px solid var(--bdr);}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.03em;}
+.logo-sub{font-size:.63rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.abadge{display:inline-flex;align-items:center;gap:5px;background:var(--pl);border:1px solid var(--pb);color:#a78bfa;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;}
+.snav{padding:18px 10px;flex:1;}
+.sg{font-size:.62rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.13em;padding:0 12px;margin:18px 0 7px;}
+.ni{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;color:var(--mut);text-decoration:none;font-size:.875rem;font-weight:500;transition:all .25s;cursor:pointer;margin-bottom:2px;border:1px solid transparent;}
+.ni:hover{background:var(--sur2);color:var(--txt);}
+.ni.on{background:var(--pl);color:#a78bfa;border-color:var(--pb);}
+.ni-ico{font-size:1rem;width:20px;text-align:center;}
+.nbadge{margin-left:auto;background:var(--pur);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px;}
+.su{padding:14px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:11px;}
+.av{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+.un{font-weight:600;font-size:.85rem;}
+.ur{font-size:.68rem;color:#a78bfa;}
+.lout{margin-left:auto;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s;}
+.lout:hover{color:var(--org);}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sb);flex:1;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(7,7,13,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:14px 32px;display:flex;align-items:center;gap:14px;}
+.tbtitle{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;flex:1;}
+.tsrch{background:var(--sur);border:1px solid var(--bdr);color:var(--txt);padding:8px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;width:220px;transition:border-color .3s;}
+.tsrch:focus{border-color:var(--pb);}
+.tsrch::placeholder{color:var(--mut);}
+.addbtn{background:var(--pur);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.84rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:7px;}
+.addbtn:hover{background:#6d28d9;box-shadow:0 8px 22px var(--glo);transform:translateY(-1px);}
+
+/* ── CONTENT ── */
+.content{padding:32px;}
+.page{display:none;}
+.page.on{display:block;animation:pgIn .38s ease;}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STATS ── */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.scard{background:var(--sur);border:1px solid var(--bdr);border-radius:13px;padding:20px;transition:transform .3s,border-color .3s;animation:fuUp .5s ease both;}
+.scard:hover{transform:translateY(-3px);border-color:var(--pb);}
+.scard:nth-child(1){animation-delay:.08s}.scard:nth-child(2){animation-delay:.16s}.scard:nth-child(3){animation-delay:.24s}.scard:nth-child(4){animation-delay:.32s}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px;}
+.sc-ico{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+.trend{font-size:.72rem;font-weight:600;}
+.up{color:#34d399}.dn{color:#f87171}
+.sc-v{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.03em;margin-bottom:3px;}
+.sc-l{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;}
+
+/* ── CHARTS ── */
+.cgrid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:28px;}
+.ccard{background:var(--sur);border:1px solid var(--bdr);border-radius:13px;padding:22px;}
+.ctitle{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:18px;font-size:.95rem;}
+.barchart{display:flex;align-items:flex-end;gap:9px;height:130px;}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(to top,#7c3aed,#a78bfa);transition:height .8s cubic-bezier(.34,1.56,.64,1);min-height:3px;}
+.bl{font-size:.66rem;color:var(--mut);}
+.bv{font-size:.7rem;font-weight:600;color:#a78bfa;}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.dleg{width:100%;display:flex;flex-direction:column;gap:7px;}
+.dlr{display:flex;align-items:center;gap:7px;font-size:.76rem;}
+.dld{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.dll{flex:1;color:var(--mut);}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.sh-t{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;}
+
+/* ── INFO BANNER ── */
+.info-banner{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:.84rem;color:#34d399;}
+
+/* ── TABLE ── */
+.twrap{background:var(--sur);border:1px solid var(--bdr);border-radius:13px;overflow:hidden;}
+.thead{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--bdr);}
+.thead-t{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+.tacts{display:flex;gap:9px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--bdr);}
+th{padding:11px 18px;text-align:left;font-size:.68rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+td{padding:13px 18px;font-size:.855rem;vertical-align:middle;}
+.tde{display:flex;align-items:center;gap:11px;}
+.tdem{width:36px;height:36px;border-radius:8px;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.tdn{font-weight:600;font-size:.875rem;margin-bottom:2px;}
+.tdv{font-size:.72rem;color:var(--mut);}
+.badge{padding:4px 11px;border-radius:100px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.bm{background:rgba(124,58,237,.14);color:#a78bfa}
+.bt{background:rgba(6,182,212,.14);color:#22d3ee}
+.bf{background:rgba(245,158,11,.14);color:#fbbf24}
+.ba{background:rgba(236,72,153,.14);color:#f472b6}
+.bs{background:rgba(16,185,129,.14);color:#34d399}
+.bc{background:rgba(99,102,241,.14);color:#818cf8}
+.bw2{background:rgba(20,184,166,.14);color:#2dd4bf}
+.stbadge{padding:4px 11px;border-radius:100px;font-size:.66rem;font-weight:700;}
+.st-a{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.22);}
+.st-d{background:rgba(107,114,128,.1);color:#9ca3af;border:1px solid rgba(107,114,128,.22);}
+.st-exp{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.22);}
+.acts{display:flex;gap:5px;}
+.ab{width:28px;height:28px;border-radius:6px;border:1px solid var(--bdr);background:none;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.82rem;transition:all .2s;}
+.ab.edit:hover{background:var(--pl);border-color:var(--pb);color:#a78bfa}
+.ab.del:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.28);color:#f87171}
+
+/* ── MODAL ── */
+.mover{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.mover.on{opacity:1;pointer-events:all;}
+.modal{background:var(--sur);border:1px solid var(--bdr);border-radius:19px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+.mover.on .modal{transform:translateY(0) scale(1);}
+.mh{padding:22px 22px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.mh-t{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;}
+.mclose{width:30px;height:30px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr);color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mclose:hover{color:var(--org);border-color:rgba(255,92,53,.3);}
+.mb{padding:18px 22px 26px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ff{margin-bottom:14px;}
+.ff label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.ff input,.ff select,.ff textarea{width:100%;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:11px 13px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:all .3s;}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--pb);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.ff input::placeholder,.ff textarea::placeholder{color:var(--mut);}
+.ff select option{background:var(--sur2);}
+.ff textarea{resize:vertical;min-height:72px;}
+input[type=date]{color-scheme:dark;}
+.egrid2{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:14px;}
+.eo{width:100%;aspect-ratio:1;border-radius:7px;background:var(--sur2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;transition:all .2s;}
+.eo:hover{border-color:var(--pb);background:var(--pl);}
+.eo.on{border-color:var(--pur);background:var(--pl);box-shadow:0 0 0 2px rgba(124,58,237,.28);}
+.mfoot{display:flex;gap:9px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bdr);}
+.btn-p{background:var(--pur);color:#fff;border:none;padding:11px 26px;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .3s;}
+.btn-p:hover{background:#6d28d9;box-shadow:0 8px 22px var(--glo);}
+.btn-o{background:transparent;color:var(--txt);border:1px solid var(--bdr);padding:11px 22px;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.875rem;cursor:pointer;transition:all .3s;}
+.btn-o:hover{border-color:var(--pb);}
+.btn-d{background:var(--red);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .3s;}
+.btn-d:hover{background:#dc2626;box-shadow:0 8px 22px rgba(239,68,68,.3);}
+
+/* ── CONFIRM DELETE ── */
+.dmodal{max-width:380px;text-align:center;}
+.dmodal .mb{padding:28px 24px;}
+.di{font-size:2.8rem;margin-bottom:12px;}
+.dt{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:8px;}
+.ds{color:var(--mut);font-size:.875rem;margin-bottom:22px;line-height:1.6;}
+.dbtns{display:flex;gap:9px;justify-content:center;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:13px 18px;display:flex;align-items:center;gap:11px;min-width:240px;box-shadow:0 14px 44px rgba(0,0,0,.5);transform:translateY(16px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+.toast.on{transform:translateY(0);opacity:1;pointer-events:all;}
+
+/* ── ACTIVITY ── */
+.afeed{display:flex;flex-direction:column;gap:11px;}
+.aitem{display:flex;gap:11px;align-items:flex-start;padding:13px;background:var(--sur2);border-radius:9px;border:1px solid var(--bdr);animation:fuUp .4s ease both;}
+.aico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.an{font-size:.855rem;font-weight:500;margin-bottom:3px;}
+.at{font-size:.7rem;color:var(--mut);}
+
+/* ── SETTINGS ── */
+.pcard{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:26px;}
+.ff-s{margin-bottom:14px;}
+.ff-s label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.ff-s input{width:100%;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:11px 13px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .3s;}
+.ff-s input:focus{border-color:var(--pb);}
+.empty{text-align:center;padding:50px 20px;color:var(--mut);}
+.empty .ei{font-size:3rem;margin-bottom:13px;}
+.empty h3{font-family:'Syne',sans-serif;font-weight:700;color:var(--txt);margin-bottom:7px;}
+
+/* ── REVENUE STATS ROW (5 wide) ── */
+.srow5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+
+@keyframes fuUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.srow{grid-template-columns:1fr 1fr}.srow5{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sl">
+    <div class="logo">EventSphere</div>
+    <div class="logo-sub">Admin Control Panel</div>
+    <div class="abadge">🛡️ Administrator</div>
+  </div>
+  <nav class="snav">
+    <div class="sg">Overview</div>
+    <a class="ni on" onclick="pg('dash',this)"><span class="ni-ico">📊</span>Dashboard</a>
+    <a class="ni"    onclick="pg('events',this)"><span class="ni-ico">🗓️</span>Manage Events<span class="nbadge" id="evBadge">0</span></a>
+    <a class="ni"    onclick="pg('bookings',this)"><span class="ni-ico">🎟️</span>Bookings<span class="nbadge" id="bkBadge">0</span></a>
+    <a class="ni"    onclick="pg('users',this)"><span class="ni-ico">👥</span>Users<span class="nbadge" id="uBadge">0</span></a>
+    <div class="sg">System</div>
+    <a class="ni"    onclick="pg('settings',this)"><span class="ni-ico">⚙️</span>Settings</a>
+  </nav>
+  <div class="su">
+    <div class="av">AD</div>
+    <div><div class="un" id="adminName">Admin User</div><div class="ur">Super Admin</div></div>
+    <button class="lout" onclick="logout()" title="Logout">⏻</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="tbtitle" id="pgTitle">Dashboard</div>
+    <input class="tsrch" type="text" placeholder="🔍  Search events…" oninput="qSearch(this.value)">
+    <button class="addbtn" onclick="openAdd()">+ Add New Event</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="page-dash">
+      <div class="info-banner">
+        ✅ All data is fetched live from <strong>MongoDB</strong>. Revenue and stats update as bookings are made.
+      </div>
+      <!-- 5-stat row: Revenue + Tickets + Bookings + Users + Events -->
+      <div class="srow5">
+        <div class="scard">
+          <div class="sc-top"><div class="sc-ico" style="background:rgba(16,185,129,.12)">💰</div><div class="trend up">Live</div></div>
+          <div class="sc-v" id="s-revenue">₹0</div><div class="sc-l">Total Revenue</div>
+        </div>
+        <div class="scard">
+          <div class="sc-top"><div class="sc-ico" style="background:rgba(245,158,11,.12)">🎫</div><div class="trend up">↑</div></div>
+          <div class="sc-v" id="s-tickets">0</div><div class="sc-l">Tickets Sold</div>
+        </div>
+        <div class="scard">
+          <div class="sc-top"><div class="sc-ico" style="background:var(--pl)">📋</div><div class="trend up">↑</div></div>
+          <div class="sc-v" id="s-bookings">0</div><div class="sc-l">Total Bookings</div>
+        </div>
+        <div class="scard">
+          <div class="sc-top"><div class="sc-ico" style="background:rgba(245,158,11,.12)">👥</div><div class="trend up">↑ 8%</div></div>
+          <div class="sc-v" id="s-users">0</div><div class="sc-l">Registered Users</div>
+        </div>
+        <div class="scard">
+          <div class="sc-top"><div class="sc-ico" style="background:var(--pl)">📅</div><div class="trend up">↑ 12%</div></div>
+          <div class="sc-v" id="s-total">0</div><div class="sc-l">Total Events</div>
+        </div>
+      </div>
+
+      <div class="cgrid">
+        <div class="ccard"><div class="ctitle">Revenue by Date (Last 30 Days)</div><div class="barchart" id="barChart"></div></div>
+        <div class="ccard"><div class="ctitle">Events by Category</div><div class="donut-wrap"><svg width="120" height="120" viewBox="0 0 120 120" id="donutSvg"></svg><div class="dleg" id="donutLeg"></div></div></div>
+      </div>
+
+      <!-- Event Sales Table -->
+      <div class="sh" style="margin-bottom:14px"><div class="sh-t">📊 Event Sales</div></div>
+      <div class="twrap" style="margin-bottom:28px">
+        <table><thead><tr><th>Event</th><th>Category</th><th>Tickets Sold</th><th>Revenue</th></tr></thead>
+        <tbody id="salesTbody"></tbody></table>
+      </div>
+
+      <div class="sh"><div class="sh-t">Recent Events</div><a href="#" style="color:#a78bfa;font-size:.82rem;text-decoration:none" onclick="pg('events',document.querySelector('[onclick*=events]'));return false">View All →</a></div>
+      <div class="twrap"><table><thead><tr><th>Event</th><th>Category</th><th>Date</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="dashTbody"></tbody></table></div>
+    </div>
+
+    <!-- MANAGE EVENTS -->
+    <div class="page" id="page-events">
+      <div class="twrap">
+        <div class="thead">
+          <div class="thead-t">All Events <span id="evtCountLabel" style="font-size:.78rem;color:var(--mut);font-weight:400"></span></div>
+          <div class="tacts">
+            <input class="tsrch" type="text" placeholder="Search…" oninput="filterTbl(this.value)">
+            <button class="addbtn" onclick="openAdd()">+ Add Event</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Event</th><th>Category</th><th>Date</th><th>Venue</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="evtTbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div class="page" id="page-bookings">
+      <div class="sh" style="margin-bottom:18px"><div class="sh-t">🎟️ All Bookings</div><span style="color:var(--mut);font-size:.82rem" id="bkCount"></span></div>
+      <div class="twrap">
+        <table>
+          <thead><tr><th>Ref</th><th>User</th><th>Event</th><th>Ticket</th><th>Qty</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="bookingsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="sh" style="margin-bottom:18px"><div class="sh-t">Registered Users</div><span style="color:var(--mut);font-size:.82rem" id="uCount"></span></div>
+      <div class="twrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>City</th><th>Joined</th><th>Bookings</th></tr></thead>
+          <tbody id="usersTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="sh-t" style="margin-bottom:18px">⚙️ Platform Settings</div>
+      <div class="pcard" style="max-width:500px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:16px">General Settings</div>
+        <div class="ff-s"><label>Platform Name</label><input type="text" value="EventSphere"></div>
+        <div class="ff-s"><label>Admin Email</label><input type="email" id="settingAdminEmail"></div>
+        <div class="ff-s"><label>Support Email</label><input type="email" value="support@eventsphere.com"></div>
+        <div class="ff-s"><label>Default Currency</label><input type="text" value="INR (₹)"></div>
+        <button class="btn-p" style="margin-top:6px">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── ADD / EDIT EVENT MODAL ── -->
+<div class="mover" id="evModal" onclick="if(event.target===this)closeEv()">
+  <div class="modal">
+    <div class="mh"><div class="mh-t" id="evModalT">Add New Event</div><button class="mclose" onclick="closeEv()">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="fId">
+      <div style="font-size:.7rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">Choose Emoji</div>
+      <div class="egrid2" id="emojiGrid"></div>
+      <div class="two">
+        <div class="ff"><label>Event Title *</label><input type="text" id="fTitle" placeholder="e.g. Neon Nights Fest"></div>
+        <div class="ff"><label>Category *</label>
+          <select id="fCat">
+            <option value="Music">🎵 Music</option>
+            <option value="Tech">💻 Technology</option>
+            <option value="Food">🍜 Food &amp; Drink</option>
+            <option value="Art">🎨 Art &amp; Culture</option>
+            <option value="Sports">⚽ Sports</option>
+            <option value="Comedy">😂 Comedy</option>
+            <option value="Wellness">🧘 Wellness</option>
+          </select>
+        </div>
+      </div>
+      <div class="two">
+        <div class="ff">
+          <label>Event Date * <span id="dateWarn" style="color:#fbbf24;font-size:.65rem;text-transform:none;letter-spacing:0"></span></label>
+          <input type="date" id="fDate" oninput="checkDateWarn()">
+        </div>
+        <div class="ff"><label>Base Price (₹) *</label><input type="number" id="fPrice" placeholder="e.g. 1499" min="0"></div>
+      </div>
+      <div class="ff"><label>Venue *</label><input type="text" id="fVenue" placeholder="e.g. MMRDA Grounds, Mumbai"></div>
+      <div class="ff"><label>City</label><input type="text" id="fCity" placeholder="e.g. Mumbai"></div>
+      <div class="ff"><label>Description</label><textarea id="fDesc" placeholder="Describe this event…"></textarea></div>
+      <div class="two">
+        <div class="ff">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="active">✅ Active (visible to users)</option>
+            <option value="draft">📋 Draft (hidden from users)</option>
+          </select>
+        </div>
+        <div class="ff"><label>Capacity</label><input type="number" id="fCap" placeholder="e.g. 500" min="1"></div>
+      </div>
+      <div style="background:var(--sur2);border-radius:9px;padding:12px;font-size:.78rem;color:var(--mut)">
+        💡 Ticket tiers are auto-generated: General=base price, VIP=2.5×, Platinum=5×
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn-o" onclick="closeEv()">Cancel</button><button class="btn-p" onclick="saveEv()">Save Event</button></div>
+  </div>
+</div>
+
+<!-- ── CONFIRM DELETE ── -->
+<div class="mover" id="delModal" onclick="if(event.target===this)closeDel()">
+  <div class="modal dmodal">
+    <div class="mb">
+      <div class="di">🗑️</div>
+      <div class="dt">Delete Event?</div>
+      <div class="ds" id="delMsg">Are you sure? This cannot be undone.</div>
+      <div class="dbtns"><button class="btn-o" onclick="closeDel()">Cancel</button><button class="btn-d" onclick="confirmDel()">Yes, Delete</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+  <div id="toastIco">✅</div>
+  <div style="font-weight:500;font-size:.875rem" id="toastMsg"></div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTH GUARD
+// ══════════════════════════════════════════════════════════════════════════════
+if (!sessionStorage.getItem('es_token') || sessionStorage.getItem('es_role') !== 'admin') {
+  window.location.href = 'login.html';
+}
+function logout() { clearSession(); window.location.href = 'login.html'; }
+
+// ── Set admin name in sidebar ─────────────────────────────────────────────────
+const adminUser = getUser();
+if (adminUser) {
+  document.getElementById('adminName').textContent = adminUser.firstName + ' ' + adminUser.lastName;
+  document.getElementById('settingAdminEmail').value = adminUser.email || '';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA STORE
+// ══════════════════════════════════════════════════════════════════════════════
+let allEvents   = [];
+let allUsers    = [];
+let allBookings = [];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATE HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function isExpired(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return new Date(dateStr) < today;
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtINR(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+function checkDateWarn() {
+  const d = document.getElementById('fDate').value;
+  const w = document.getElementById('dateWarn');
+  if (!d) { w.textContent=''; return; }
+  w.textContent = isExpired(d) ? '⚠ Past date — users won\'t see this event' : '';
+}
+document.getElementById('fDate').min = todayStr();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════════════════════
+let toastTmr;
+function toast(ico, msg, col) {
+  clearTimeout(toastTmr);
+  const t = document.getElementById('toast');
+  document.getElementById('toastIco').textContent = ico;
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.borderColor = col || 'var(--bdr)';
+  t.classList.add('on');
+  toastTmr = setTimeout(() => t.classList.remove('on'), 3500);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CATEGORY MAPS
+// ══════════════════════════════════════════════════════════════════════════════
+const catCls = {Music:'bm',Tech:'bt',Food:'bf',Art:'ba',Sports:'bs',Comedy:'bc',Wellness:'bw2'};
+const catCol = {Music:'#a78bfa',Tech:'#22d3ee',Food:'#fbbf24',Art:'#f472b6',Sports:'#34d399',Comedy:'#818cf8',Wellness:'#2dd4bf'};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOAD ANALYTICS (dashboard stats + charts + event sales)
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadAnalytics() {
+  try {
+    const [sumData, evSalesData, revData] = await Promise.all([
+      apiCall('/admin/analytics', {}, true),
+      apiCall('/admin/analytics/events', {}, true),
+      apiCall('/admin/analytics/revenue', {}, true),
+    ]);
+
+    const a = sumData.analytics;
+    document.getElementById('s-revenue').textContent  = fmtINR(a.totalRevenue);
+    document.getElementById('s-tickets').textContent  = a.totalTicketsSold;
+    document.getElementById('s-bookings').textContent = a.totalBookings;
+    document.getElementById('s-users').textContent    = a.totalUsers;
+    document.getElementById('s-total').textContent    = a.totalEvents;
+    document.getElementById('uBadge').textContent     = a.totalUsers;
+
+    // Event sales table
+    const sb = document.getElementById('salesTbody');
+    sb.innerHTML = evSalesData.eventSales.length ? evSalesData.eventSales.map(es => `
+      <tr>
+        <td><div class="tde"><div class="tdem">${es.emoji||'🎟️'}</div><div><div class="tdn">${es.eventName}</div><div class="tdv">${es.bookings} booking${es.bookings!==1?'s':''}</div></div></div></td>
+        <td><span class="badge ${catCls[es.category]||'bm'}">${es.category}</span></td>
+        <td><strong style="font-family:'Syne',sans-serif;color:#a78bfa">${es.ticketsSold}</strong></td>
+        <td><strong style="font-family:'Syne',sans-serif;color:#34d399">${fmtINR(es.revenue)}</strong></td>
+      </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--mut)">No bookings yet.</td></tr>';
+
+    // Revenue bar chart from real data
+    drawBars(revData.revenueByDate || []);
+
+  } catch (e) {
+    console.error('Analytics error:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOAD EVENTS (admin — all events including draft)
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadEvents() {
+  try {
+    const data = await apiCall('/events/all', {}, true);
+    allEvents = data.events || [];
+    document.getElementById('evBadge').textContent = allEvents.length;
+    renderTables();
+    drawDonut();
+  } catch (e) {
+    console.error('Load events error:', e);
+    toast('❌', 'Failed to load events.', 'rgba(239,68,68,.3)');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOAD BOOKINGS (admin)
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadBookings() {
+  try {
+    const data = await apiCall('/bookings/admin/all', {}, true);
+    allBookings = data.bookings || [];
+    document.getElementById('bkBadge').textContent = allBookings.length;
+    renderBookings();
+  } catch (e) {
+    console.error('Load bookings error:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOAD USERS (admin)
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadUsers() {
+  try {
+    const data = await apiCall('/admin/users', {}, true);
+    allUsers = data.users || [];
+    renderUsers();
+  } catch (e) {
+    console.error('Load users error:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TABLE RENDERERS
+// ══════════════════════════════════════════════════════════════════════════════
+function getStatusBadge(ev) {
+  if (ev.status === 'draft') return '<span class="stbadge st-d">Draft</span>';
+  if (isExpired(ev.date))   return '<span class="stbadge st-exp">Expired</span>';
+  return '<span class="stbadge st-a">Active</span>';
+}
+
+function mkRow(ev, full=false) {
+  const id = ev._id;
+  const venue = full ? `<td><span style="font-size:.82rem">${ev.venue}</span></td>` : '';
+  return `<tr>
+    <td><div class="tde">
+      <div class="tdem">${ev.emoji}</div>
+      <div>
+        <div class="tdn">${ev.title}</div>
+        <div class="tdv">${full ? '' : ev.venue}</div>
+      </div>
+    </div></td>
+    <td><span class="badge ${catCls[ev.category]||'bm'}">${ev.category}</span></td>
+    <td><span style="font-size:.82rem">${fmtDate(ev.date)}${isExpired(ev.date)?'<br><span style="font-size:.65rem;color:#f87171">Expired</span>':''}</span></td>
+    ${venue}
+    <td>${fmtINR(ev.basePrice)}</td>
+    <td>${getStatusBadge(ev)}</td>
+    <td><div class="acts">
+      <button class="ab edit" onclick="openEdit('${id}')" title="Edit">✏️</button>
+      <button class="ab del"  onclick="openDel('${id}')"  title="Delete">🗑️</button>
+    </div></td>
+  </tr>`;
+}
+
+function renderTables() {
+  document.getElementById('dashTbody').innerHTML    = allEvents.slice(0,6).map(e=>mkRow(e,false)).join('');
+  document.getElementById('evtTbody').innerHTML     = allEvents.map(e=>mkRow(e,true)).join('');
+  document.getElementById('evtCountLabel').textContent = `(${allEvents.length} total)`;
+}
+
+function filterTbl(q) {
+  const filtered = allEvents.filter(e =>
+    e.title.toLowerCase().includes(q.toLowerCase()) ||
+    e.category.toLowerCase().includes(q.toLowerCase()) ||
+    e.venue.toLowerCase().includes(q.toLowerCase())
+  );
+  document.getElementById('evtTbody').innerHTML = filtered.map(e=>mkRow(e,true)).join('');
+}
+
+function qSearch(q) {
+  pg('events', document.querySelector('[onclick*=events]'));
+  filterTbl(q);
+}
+
+function renderUsers() {
+  const count = allUsers.length;
+  document.getElementById('uCount').textContent = count + ' user' + (count!==1?'s':'') + ' registered';
+  const tb = document.getElementById('usersTbody');
+  if (!count) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--mut)">No users registered yet.</td></tr>';
+    return;
+  }
+  tb.innerHTML = allUsers.map(u => `<tr>
+    <td><strong>${u.firstName} ${u.lastName}</strong></td>
+    <td>${u.email}</td>
+    <td>${u.city || '—'}</td>
+    <td>${fmtDate(u.createdAt)}</td>
+    <td><span style="font-family:'Syne',sans-serif;font-weight:700;color:#a78bfa">${u.bookingCount}</span></td>
+  </tr>`).join('');
+}
+
+function renderBookings() {
+  const count = allBookings.length;
+  document.getElementById('bkCount').textContent = count + ' booking' + (count!==1?'s':'');
+  const tb = document.getElementById('bookingsTbody');
+  if (!count) {
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--mut)">No bookings yet.</td></tr>';
+    return;
+  }
+  tb.innerHTML = allBookings.map(b => {
+    const u = b.user || {};
+    const e = b.event || {};
+    return `<tr>
+      <td><code style="font-size:.72rem;color:#a78bfa">${b.bookingReference}</code></td>
+      <td><div class="tdn">${u.firstName||''} ${u.lastName||''}</div><div class="tdv">${u.email||''}</div></td>
+      <td><div class="tdn">${e.title||'—'}</div><div class="tdv">${e.category||''}</div></td>
+      <td>${b.ticketType}</td>
+      <td>${b.quantity}</td>
+      <td><strong style="color:#34d399">${fmtINR(b.totalAmount)}</strong></td>
+      <td style="font-size:.78rem">${fmtDate(b.bookedAt)}</td>
+      <td><span class="stbadge ${b.bookingStatus==='confirmed'?'st-a':'st-d'}">${b.bookingStatus}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════════════════════════════════
+function drawBars(revenueData) {
+  const c = document.getElementById('barChart'); c.innerHTML='';
+  if (!revenueData.length) {
+    c.innerHTML = '<div style="color:var(--mut);font-size:.82rem;margin:auto">No revenue data yet.</div>';
+    return;
+  }
+  // Show last 7 days (or all if fewer)
+  const slice = revenueData.slice(-7);
+  const mx = Math.max(...slice.map(d=>d.revenue), 1);
+  slice.forEach((d,i) => {
+    const label = new Date(d.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const w = document.createElement('div'); w.className='bw';
+    const v = document.createElement('div'); v.className='bv'; v.textContent = fmtINR(d.revenue);
+    const b = document.createElement('div'); b.className='bar'; b.style.height='0';
+    const l = document.createElement('div'); l.className='bl'; l.textContent=label;
+    w.appendChild(v);w.appendChild(b);w.appendChild(l); c.appendChild(w);
+    setTimeout(()=>{ b.style.height=(d.revenue/mx*120)+'px'; }, 80+i*70);
+  });
+}
+
+function drawDonut() {
+  const cats = {}; allEvents.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+1; });
+  const total = allEvents.length; if(!total) return;
+  const svg = document.getElementById('donutSvg'); svg.innerHTML='';
+  const leg = document.getElementById('donutLeg'); leg.innerHTML='';
+  let off=0; const r=45,cx=60,cy=60;
+  Object.entries(cats).forEach(([cat,cnt]) => {
+    const pct=cnt/total, ang=pct*2*Math.PI;
+    const x1=cx+r*Math.sin(off), y1=cy-r*Math.cos(off);
+    off+=ang;
+    const x2=cx+r*Math.sin(off), y2=cy-r*Math.cos(off);
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${cx} ${cy}L${x1} ${y1}A${r} ${r} 0 ${ang>Math.PI?1:0} 1 ${x2} ${y2}Z`);
+    path.setAttribute('fill', catCol[cat]||'#6b7280');
+    path.setAttribute('stroke','#0f0f1a'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    const ci=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ci.setAttribute('cx',cx);ci.setAttribute('cy',cy);ci.setAttribute('r',22);ci.setAttribute('fill','#0f0f1a');
+    svg.appendChild(ci);
+    const row=document.createElement('div'); row.className='dlr';
+    row.innerHTML=`<div class="dld" style="background:${catCol[cat]||'#6b7280'}"></div><div class="dll">${cat}</div><div>${Math.round(pct*100)}%</div>`;
+    leg.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EMOJI PICKER
+// ══════════════════════════════════════════════════════════════════════════════
+const EMOJIS=['🎵','🎸','🎤','🎹','🥁','🎻','🎷','🎺','💻','📱','🤖','🎮','🕹️','🍜','🍷','🥂','🍕','🍣','🎨','🖼️','🎭','🎪','🏆','⚽','🏀','🎾','🏊','🎯','😂','🤣','🎉','🎊','🧘','🌿','🎓','📚','🌍','🚀'];
+let selEmoji='🎵';
+function renderEmojis() {
+  const g=document.getElementById('emojiGrid'); g.innerHTML='';
+  EMOJIS.forEach(e => {
+    const el=document.createElement('div'); el.className='eo'+(e===selEmoji?' on':'');
+    el.textContent=e;
+    el.onclick=()=>{ selEmoji=e; document.querySelectorAll('.eo').forEach(x=>x.classList.remove('on')); el.classList.add('on'); };
+    g.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ADD / EDIT MODAL
+// ══════════════════════════════════════════════════════════════════════════════
+let editId=null, delId=null;
+
+function openAdd() {
+  editId=null; selEmoji='🎵';
+  document.getElementById('evModalT').textContent='Add New Event';
+  ['fTitle','fVenue','fDesc','fCap','fCity'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPrice').value='';
+  document.getElementById('fDate').value='';
+  document.getElementById('fCat').value='Music';
+  document.getElementById('fStatus').value='active';
+  document.getElementById('dateWarn').textContent='';
+  renderEmojis();
+  document.getElementById('evModal').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function openEdit(id) {
+  const ev=allEvents.find(e=>e._id===id); if(!ev) return;
+  editId=id; selEmoji=ev.emoji;
+  document.getElementById('evModalT').textContent='Edit Event';
+  document.getElementById('fTitle').value  = ev.title;
+  document.getElementById('fCat').value    = ev.category;
+  document.getElementById('fDate').value   = new Date(ev.date).toISOString().split('T')[0];
+  document.getElementById('fPrice').value  = ev.basePrice;
+  document.getElementById('fVenue').value  = ev.venue;
+  document.getElementById('fCity').value   = ev.city || '';
+  document.getElementById('fDesc').value   = ev.description || '';
+  document.getElementById('fStatus').value = ev.status;
+  document.getElementById('fCap').value    = ev.totalCapacity || '';
+  checkDateWarn();
+  renderEmojis();
+  document.getElementById('evModal').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function closeEv() { document.getElementById('evModal').classList.remove('on'); document.body.style.overflow=''; }
+
+async function saveEv() {
+  const title = document.getElementById('fTitle').value.trim();
+  const venue = document.getElementById('fVenue').value.trim();
+  const price = document.getElementById('fPrice').value;
+  const date  = document.getElementById('fDate').value;
+  if (!title || !venue || !price || !date) { toast('⚠️','Please fill all required fields.','rgba(245,158,11,.3)'); return; }
+
+  const payload = {
+    emoji:         selEmoji,
+    title,
+    description:   document.getElementById('fDesc').value,
+    category:      document.getElementById('fCat').value,
+    date,
+    venue,
+    city:          document.getElementById('fCity').value.trim(),
+    basePrice:     parseInt(price),
+    totalCapacity: parseInt(document.getElementById('fCap').value) || 500,
+    status:        document.getElementById('fStatus').value,
+  };
+
+  try {
+    if (editId) {
+      await apiCall(`/events/${editId}`, { method:'PUT', body:JSON.stringify(payload) }, true);
+      toast('✅','Event updated — visible to users immediately!');
+    } else {
+      await apiCall('/events', { method:'POST', body:JSON.stringify(payload) }, true);
+      toast('🎉','New event added and live!');
+    }
+    closeEv();
+    await loadEvents();
+    await loadAnalytics();
+  } catch (e) {
+    toast('❌', e.message || 'Failed to save event.', 'rgba(239,68,68,.3)');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DELETE
+// ══════════════════════════════════════════════════════════════════════════════
+function openDel(id) {
+  delId=id;
+  const ev=allEvents.find(e=>e._id===id);
+  document.getElementById('delMsg').textContent=`Delete "${ev?.title}"? This cannot be undone.`;
+  document.getElementById('delModal').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeDel() { document.getElementById('delModal').classList.remove('on'); document.body.style.overflow=''; }
+async function confirmDel() {
+  try {
+    await apiCall(`/events/${delId}`, { method:'DELETE' }, true);
+    closeDel();
+    toast('🗑️','Event deleted.');
+    await loadEvents();
+    await loadAnalytics();
+  } catch (e) {
+    toast('❌', e.message || 'Failed to delete.', 'rgba(239,68,68,.3)');
+    closeDel();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+function pg(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  if(el) el.classList.add('on');
+  const titles={dash:'Dashboard',events:'Manage Events',bookings:'Bookings',users:'Users',settings:'Settings'};
+  document.getElementById('pgTitle').textContent=titles[id]||id;
+  if(id==='events')   { renderTables(); }
+  if(id==='users')    { loadUsers(); }
+  if(id==='bookings') { loadBookings(); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INIT — load everything on page load
+// ══════════════════════════════════════════════════════════════════════════════
+(async () => {
+  await Promise.all([loadEvents(), loadAnalytics()]);
+})();
+</script>
+</body>
+</html>

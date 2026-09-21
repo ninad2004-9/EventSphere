@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventSphere — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f; --sur:#111118; --sur2:#1a1a26;
+  --bdr:rgba(255,255,255,0.07); --acc:#ff5c35; --pur:#7c3aed;
+  --gld:#f59e0b; --grn:#10b981; --txt:#f0f0f5; --mut:#6b6b80;
+  --glo:rgba(255,92,53,0.22); --sb:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--acc);border-radius:4px;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sb);background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;animation:sideIn .5s ease;}
+@keyframes sideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.sl{padding:26px 22px 22px;border-bottom:1px solid var(--bdr);}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#ff5c35,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.03em;}
+.logo-sub{font-size:.65rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.snav{padding:18px 10px;flex:1;overflow-y:auto;}
+.sg{font-size:.63rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.13em;padding:0 12px;margin:18px 0 7px;}
+.ni{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;color:var(--mut);text-decoration:none;font-size:.875rem;font-weight:500;transition:all .25s;cursor:pointer;margin-bottom:2px;border:1px solid transparent;}
+.ni:hover{background:var(--sur2);color:var(--txt);}
+.ni.on{background:rgba(255,92,53,.1);color:var(--acc);border-color:rgba(255,92,53,.18);}
+.ni-ico{font-size:1rem;width:20px;text-align:center;}
+.nbadge{margin-left:auto;background:var(--acc);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px;}
+.su{padding:14px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:11px;}
+.av{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--gld));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+.un{font-weight:600;font-size:.85rem;}
+.ur{font-size:.68rem;color:var(--mut);}
+.lout{margin-left:auto;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s;}
+.lout:hover{color:var(--acc);}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sb);flex:1;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(10,10,15,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:14px 32px;display:flex;align-items:center;gap:14px;}
+.tbtitle{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;flex:1;}
+.srchbox{background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:8px 13px;display:flex;align-items:center;gap:9px;width:260px;transition:border-color .3s;}
+.srchbox:focus-within{border-color:rgba(255,92,53,.35);}
+.srchbox input{background:none;border:none;outline:none;color:var(--txt);font-size:.85rem;font-family:'DM Sans',sans-serif;width:100%;}
+.srchbox input::placeholder{color:var(--mut);}
+.notif{width:36px;height:36px;border-radius:8px;background:var(--sur);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:.95rem;position:relative;}
+.notif:hover{border-color:var(--acc);}
+.ndot{position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--acc);border:1px solid var(--bg);}
+
+/* ── CONTENT ── */
+.content{padding:32px;}
+.page{display:none;}
+.page.on{display:block;animation:pgIn .38s ease;}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO BANNER ── */
+.hero{background:linear-gradient(135deg,#1a0a2e 0%,#0f1a2e 50%,#0a1a1a 100%);border:1px solid var(--bdr);border-radius:18px;padding:44px;margin-bottom:32px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 90% 50%,rgba(124,58,237,.2) 0%,transparent 60%);}
+.hero-em{position:absolute;right:52px;top:50%;transform:translateY(-50%);font-size:6.5rem;opacity:.55;filter:drop-shadow(0 0 40px rgba(124,58,237,.5));}
+.h-tag{display:inline-flex;gap:6px;align-items:center;background:rgba(255,92,53,.12);border:1px solid rgba(255,92,53,.28);color:var(--acc);padding:5px 12px;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;letter-spacing:-.03em;line-height:1.12;margin-bottom:10px;position:relative;z-index:1;max-width:480px;}
+.hero p{color:var(--mut);line-height:1.65;margin-bottom:26px;position:relative;z-index:1;max-width:400px;font-size:.9rem;}
+.h-btns{display:flex;gap:11px;position:relative;z-index:1;}
+
+/* ── STATS ROW ── */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px;}
+.scard{background:var(--sur);border:1px solid var(--bdr);border-radius:13px;padding:19px 20px;transition:transform .3s,border-color .3s;animation:fuUp .5s ease both;}
+.scard:hover{transform:translateY(-3px);border-color:rgba(255,92,53,.18);}
+.scard:nth-child(1){animation-delay:.08s}.scard:nth-child(2){animation-delay:.16s}.scard:nth-child(3){animation-delay:.24s}.scard:nth-child(4){animation-delay:.32s}
+.sc-ico{font-size:1.4rem;margin-bottom:9px;}
+.sc-v{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:3px;}
+.sc-l{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.sh-t{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;}
+.sh-a{color:var(--acc);font-size:.82rem;text-decoration:none;font-weight:500;}
+.sh-a:hover{opacity:.7;}
+
+/* ── FILTER CHIPS ── */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.chip{padding:7px 17px;border-radius:100px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.chip:hover{color:var(--txt);border-color:rgba(255,92,53,.3);}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff;}
+
+/* ── EVENT CARDS ── */
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:18px;}
+.ec{background:var(--sur);border:1px solid var(--bdr);border-radius:15px;overflow:hidden;cursor:pointer;transition:all .35s cubic-bezier(.34,1.56,.64,1);animation:fuUp .5s ease both;}
+.ec:hover{transform:translateY(-6px);border-color:rgba(255,92,53,.22);box-shadow:0 18px 48px rgba(0,0,0,.4),0 0 28px var(--glo);}
+.ec-img{height:155px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative;overflow:hidden;}
+.ec-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--sur),transparent 55%);}
+.ec-cat{position:absolute;top:11px;left:11px;z-index:2;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;}
+.ec-fav{position:absolute;top:11px;right:11px;z-index:2;width:29px;height:29px;border-radius:50%;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:.82rem;}
+.ec-fav:hover{background:rgba(255,92,53,.28);}
+.ec-fav.liked{background:var(--acc);border-color:var(--acc);}
+.ec-body{padding:16px;}
+.ec-date{font-size:.7rem;color:var(--acc);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px;}
+.ec-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;line-height:1.3;margin-bottom:7px;letter-spacing:-.02em;}
+.ec-venue{font-size:.78rem;color:var(--mut);margin-bottom:14px;}
+.ec-foot{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--bdr);}
+.ec-price{font-family:'Syne',sans-serif;font-weight:700;color:var(--acc);font-size:1.05rem;}
+.bkbtn{background:rgba(255,92,53,.1);color:var(--acc);border:1px solid rgba(255,92,53,.22);padding:6px 15px;border-radius:7px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .25px;}
+.bkbtn:hover{background:var(--acc);color:#fff;border-color:var(--acc);}
+
+/* ── TICKETS LIST ── */
+.tlist{display:flex;flex-direction:column;gap:13px;}
+.tcard{background:var(--sur);border:1px solid var(--bdr);border-radius:13px;padding:18px 22px;display:flex;align-items:center;gap:18px;transition:border-color .3s;animation:fuUp .4s ease both;}
+.tcard:hover{border-color:rgba(255,92,53,.18);}
+.tem{width:52px;height:52px;border-radius:12px;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.ti{flex:1;}
+.tn{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:5px;font-size:.95rem;}
+.tm{font-size:.78rem;color:var(--mut);display:flex;gap:14px;flex-wrap:wrap;}
+.tbadge{padding:4px 13px;border-radius:100px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.t-conf{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.22);}
+.t-up{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.22);}
+.t-past{background:rgba(107,114,128,.1);color:#9ca3af;border:1px solid rgba(107,114,128,.22);}
+.tprice{font-family:'Syne',sans-serif;font-weight:700;color:var(--acc);font-size:1rem;white-space:nowrap;}
+.tref{font-size:.68rem;color:var(--mut);margin-top:3px;}
+
+/* ── PROFILE ── */
+.pgrid{display:grid;grid-template-columns:1fr 2fr;gap:22px;}
+.pcard{background:var(--sur);border:1px solid var(--bdr);border-radius:15px;padding:26px;}
+.pav{width:76px;height:76px;border-radius:18px;background:linear-gradient(135deg,var(--acc),var(--gld));display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;margin:0 auto 14px;}
+.pname{font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem;text-align:center;margin-bottom:4px;}
+.pemail{font-size:.78rem;color:var(--mut);text-align:center;margin-bottom:18px;}
+.pstats{display:flex;justify-content:space-around;padding-top:16px;border-top:1px solid var(--bdr);}
+.ps-n{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;color:var(--acc);}
+.ps-l{font-size:.67rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;}
+.ff{margin-bottom:14px;}
+.ff label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.ff input{width:100%;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:11px 13px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .3s;}
+.ff input:focus{border-color:rgba(255,92,53,.4);}
+
+/* ── BUTTONS ── */
+.btn{background:var(--acc);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.875rem;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px var(--glo);}
+.btn-o{background:transparent;color:var(--txt);border:1px solid var(--bdr);padding:11px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.875rem;cursor:pointer;transition:all .3s;}
+.btn-o:hover{border-color:var(--acc);color:var(--acc);}
+
+/* ── MODAL ── */
+.mover{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.mover.on{opacity:1;pointer-events:all;}
+.modal{background:var(--sur);border:1px solid var(--bdr);border-radius:19px;width:90%;max-width:490px;max-height:90vh;overflow-y:auto;transform:translateY(22px) scale(.97);transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+.mover.on .modal{transform:translateY(0) scale(1);}
+.mh{padding:22px 22px 0;display:flex;justify-content:space-between;align-items:center;}
+.mh-t{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;}
+.mclose{width:30px;height:30px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr);color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mclose:hover{color:var(--acc);border-color:var(--acc);}
+.mb{padding:18px 22px 22px;}
+.minfo{background:var(--sur2);border-radius:11px;padding:13px 15px;display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.topt{border:1px solid var(--bdr);border-radius:9px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:all .25s;display:flex;justify-content:space-between;align-items:center;}
+.topt:hover{border-color:rgba(255,92,53,.3);}
+.topt.sel{border-color:var(--acc);background:rgba(255,92,53,.06);}
+.topt.sold-out{opacity:.4;cursor:not-allowed;}
+.to-n{font-weight:600;font-size:.875rem;}
+.to-d{font-size:.73rem;color:var(--mut);margin-top:2px;}
+.to-p{font-family:'Syne',sans-serif;font-weight:700;color:var(--acc);font-size:1.05rem;}
+.to-avail{font-size:.65rem;color:var(--mut);margin-top:2px;}
+.qrow{display:flex;align-items:center;gap:11px;margin:16px 0;}
+.ql{flex:1;font-weight:600;font-size:.875rem;}
+.qb{width:30px;height:30px;border-radius:7px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.qb:hover{background:var(--acc);border-color:var(--acc);}
+.qn{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;min-width:22px;text-align:center;}
+.sumbox{background:var(--sur2);border-radius:10px;padding:15px;margin-bottom:16px;}
+.sr{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:7px;color:var(--mut);}
+.sr.tot{color:var(--txt);font-weight:700;font-size:.92rem;border-top:1px solid var(--bdr);padding-top:9px;margin:4px 0 0;}
+.paybtn{width:100%;background:var(--acc);color:#fff;border:none;padding:15px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.92rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.paybtn:hover{background:#ff3d12;box-shadow:0 10px 28px var(--glo);}
+.paybtn:disabled{opacity:.6;cursor:not-allowed;}
+.succ{text-align:center;padding:44px 22px;display:none;}
+.succ-ico{font-size:3.5rem;margin-bottom:14px;animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.succ-t{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;margin-bottom:8px;}
+.succ-s{color:var(--mut);margin-bottom:26px;font-size:.9rem;}
+.tstub{background:linear-gradient(135deg,var(--acc),#ff8c00);border-radius:13px;padding:18px;max-width:270px;margin:0 auto 22px;position:relative;overflow:hidden;}
+.tstub::before,.tstub::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:var(--sur);}
+.tstub::before{left:-18px}.tstub::after{right:-18px}
+.stub-n{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;margin-bottom:4px;}
+.stub-d{font-size:.78rem;opacity:.85;margin-bottom:6px;}
+.stub-ref{font-size:.7rem;opacity:.75;margin-bottom:10px;letter-spacing:.05em;}
+.stub-bc{background:rgba(255,255,255,.14);border-radius:6px;height:38px;display:flex;align-items:center;gap:2px;padding:7px;overflow:hidden;}
+.bb{width:3px;background:rgba(255,255,255,.72);border-radius:1px;}
+
+/* ── INFO BANNER ── */
+.info-banner{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:.85rem;color:#34d399;}
+.err-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:.85rem;color:#f87171;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--mut);}
+.empty .ei{font-size:3.2rem;margin-bottom:14px;}
+.empty h3{font-family:'Syne',sans-serif;font-weight:700;color:var(--txt);margin-bottom:8px;}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:40px;color:var(--mut);}
+.spin{display:inline-block;width:28px;height:28px;border:3px solid var(--bdr);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── CATEGORY COLOUR HELPERS ── */
+.cm{background:rgba(124,58,237,.14);color:#a78bfa;}
+.ct{background:rgba(6,182,212,.14);color:#22d3ee;}
+.cf{background:rgba(245,158,11,.14);color:#fbbf24;}
+.ca{background:rgba(236,72,153,.14);color:#f472b6;}
+.cs{background:rgba(16,185,129,.14);color:#34d399;}
+.cc{background:rgba(99,102,241,.14);color:#818cf8;}
+.bw2{background:rgba(20,184,166,.14);color:#2dd4bf;}
+
+@keyframes fuUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.srow{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sl">
+    <div class="logo">EventSphere</div>
+    <div class="logo-sub">User Dashboard</div>
+  </div>
+  <nav class="snav">
+    <div class="sg">Discover</div>
+    <a class="ni on"  onclick="pg('home',this)"><span class="ni-ico">🏠</span>Home</a>
+    <a class="ni"     onclick="pg('browse',this)"><span class="ni-ico">🔍</span>Browse Events<span class="nbadge" id="evtBadge">0</span></a>
+    <a class="ni"     onclick="pg('wishlist',this)"><span class="ni-ico">❤️</span>Wishlist<span class="nbadge" id="wishBadge" style="display:none"></span></a>
+    <div class="sg">My Account</div>
+    <a class="ni"     onclick="pg('tickets',this)"><span class="ni-ico">🎟️</span>My Tickets<span class="nbadge" id="tktBadge">0</span></a>
+    <a class="ni"     onclick="pg('profile',this)"><span class="ni-ico">👤</span>Profile</a>
+    <a class="ni"     onclick="pg('settings',this)"><span class="ni-ico">⚙️</span>Settings</a>
+  </nav>
+  <div class="su">
+    <div class="av" id="sAv">?</div>
+    <div><div class="un" id="sName">User</div><div class="ur" id="sJoined">Member</div></div>
+    <button class="lout" onclick="logout()" title="Logout">⏻</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="tbtitle" id="pgTitle">Home</div>
+    <div class="srchbox"><span style="color:var(--mut)">🔍</span><input type="text" placeholder="Search events…" oninput="gSearch(this.value)"></div>
+    <div class="notif">🔔<div class="ndot"></div></div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME PAGE -->
+    <div class="page on" id="page-home">
+      <div class="hero">
+        <div class="hero-em">🎭</div>
+        <div class="h-tag">✦ Live Events Near You</div>
+        <h1>Hello, <span id="greetName">there</span> 👋<br>What's on today?</h1>
+        <p>Explore events curated just for you — from electrifying concerts to groundbreaking tech summits.</p>
+        <div class="h-btns">
+          <button class="btn" onclick="pg('browse',document.querySelector('[onclick*=browse]'))">Browse Events →</button>
+          <button class="btn-o" onclick="pg('tickets',document.querySelector('[onclick*=tickets]'))">My Tickets</button>
+        </div>
+      </div>
+      <div class="srow">
+        <div class="scard"><div class="sc-ico">🎟️</div><div class="sc-v" id="sc-booked">0</div><div class="sc-l">Tickets Booked</div></div>
+        <div class="scard"><div class="sc-ico">❤️</div><div class="sc-v" id="sc-wish">0</div><div class="sc-l">Wishlist</div></div>
+        <div class="scard"><div class="sc-ico">🎪</div><div class="sc-v" id="sc-avail">0</div><div class="sc-l">Events Available</div></div>
+        <div class="scard"><div class="sc-ico">⭐</div><div class="sc-v">4.8</div><div class="sc-l">Avg Rating</div></div>
+      </div>
+      <div class="sh"><div class="sh-t">🔥 Trending Now</div><a href="#" class="sh-a" onclick="pg('browse',document.querySelector('[onclick*=browse]'));return false">View All →</a></div>
+      <div class="egrid" id="trendGrid"></div>
+    </div>
+
+    <!-- BROWSE PAGE -->
+    <div class="page" id="page-browse">
+      <div class="sh" style="margin-bottom:14px">
+        <div class="sh-t">Browse All Events</div>
+        <span style="color:var(--mut);font-size:.82rem" id="rCount"></span>
+      </div>
+      <div class="chips" id="filterChips">
+        <div class="chip on" onclick="filt(this,'all')">🌟 All</div>
+        <div class="chip" onclick="filt(this,'Music')">🎵 Music</div>
+        <div class="chip" onclick="filt(this,'Tech')">💻 Tech</div>
+        <div class="chip" onclick="filt(this,'Food')">🍜 Food</div>
+        <div class="chip" onclick="filt(this,'Art')">🎨 Art</div>
+        <div class="chip" onclick="filt(this,'Sports')">⚽ Sports</div>
+        <div class="chip" onclick="filt(this,'Comedy')">😂 Comedy</div>
+        <div class="chip" onclick="filt(this,'Wellness')">🧘 Wellness</div>
+      </div>
+      <div class="egrid" id="browseGrid"></div>
+    </div>
+
+    <!-- WISHLIST PAGE -->
+    <div class="page" id="page-wishlist">
+      <div class="sh" style="margin-bottom:22px"><div class="sh-t">❤️ My Wishlist</div></div>
+      <div id="wishContent"></div>
+    </div>
+
+    <!-- TICKETS PAGE -->
+    <div class="page" id="page-tickets">
+      <div class="sh" style="margin-bottom:8px"><div class="sh-t">🎟️ My Tickets</div></div>
+      <div class="info-banner">✅ Your tickets are saved from MongoDB and will appear here every time you log in.</div>
+      <div class="tlist" id="tktList"></div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="page-profile">
+      <div class="sh" style="margin-bottom:22px"><div class="sh-t">👤 My Profile</div></div>
+      <div class="pgrid">
+        <div class="pcard">
+          <div class="pav" id="profAv">?</div>
+          <div class="pname" id="profName">User</div>
+          <div class="pemail" id="profEmail">—</div>
+          <div class="pstats">
+            <div style="text-align:center"><div class="ps-n" id="ps-b">0</div><div class="ps-l">Booked</div></div>
+            <div style="text-align:center"><div class="ps-n" id="ps-w">0</div><div class="ps-l">Wished</div></div>
+            <div style="text-align:center"><div class="ps-n">4.8</div><div class="ps-l">Rating</div></div>
+          </div>
+        </div>
+        <div class="pcard">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:18px">Edit Profile</div>
+          <div class="ff"><label>First Name</label><input type="text" id="pf-fn"></div>
+          <div class="ff"><label>Last Name</label><input type="text" id="pf-ln"></div>
+          <div class="ff"><label>Email</label><input type="email" id="pf-email" disabled style="opacity:.5"></div>
+          <div class="ff"><label>City</label><input type="text" id="pf-city"></div>
+          <div class="ff"><label>Phone</label><input type="text" id="pf-phone" placeholder="+91 XXXXX XXXXX"></div>
+          <div id="profileMsg" style="font-size:.82rem;margin-bottom:12px;display:none"></div>
+          <button class="btn" style="margin-top:6px" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="sh-t" style="margin-bottom:22px">⚙️ Settings</div>
+      <div class="pcard" style="max-width:480px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:16px">Preferences</div>
+        <div class="ff"><label>Language</label><input type="text" value="English"></div>
+        <div class="ff"><label>Currency</label><input type="text" value="INR (₹)"></div>
+        <div class="ff"><label>Notification Email</label><input type="email" id="set-email"></div>
+        <button class="btn" style="margin-top:6px">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── BOOKING MODAL ── -->
+<div class="mover" id="modal" onclick="if(event.target===this)closeM()">
+  <div class="modal">
+    <div id="mMain">
+      <div class="mh"><div class="mh-t">Book Tickets</div><button class="mclose" onclick="closeM()">✕</button></div>
+      <div class="mb">
+        <div class="minfo">
+          <span style="font-size:2rem" id="mEmo">🎵</span>
+          <div>
+            <div style="font-weight:700;font-size:.95rem" id="mName">—</div>
+            <div style="font-size:.78rem;color:var(--mut)" id="mMeta">—</div>
+          </div>
+        </div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">Select Ticket Type</div>
+        <div id="ticketOptions"></div>
+        <div class="qrow">
+          <div class="ql">Number of Tickets</div>
+          <button class="qb" onclick="chQ(-1)">−</button>
+          <div class="qn" id="qNum">1</div>
+          <button class="qb" onclick="chQ(1)">+</button>
+        </div>
+        <div class="sumbox">
+          <div class="sr"><span>Ticket Price</span><span id="sm-p">—</span></div>
+          <div class="sr"><span>Quantity</span><span id="sm-q">× 1</span></div>
+          <div class="sr"><span>Service Fee</span><span id="sm-f">—</span></div>
+          <div class="sr tot"><span>Total</span><span id="sm-t">—</span></div>
+        </div>
+        <div id="bookErr" class="err-banner" style="display:none">⚠ <span id="bookErrT"></span></div>
+        <button class="paybtn" id="payBtn" onclick="confirmBook()">🔒 Confirm &amp; Pay</button>
+      </div>
+    </div>
+    <div class="succ" id="mSucc">
+      <div class="succ-ico">🎉</div>
+      <div class="succ-t">Booking Confirmed!</div>
+      <p class="succ-s">Your e-ticket has been saved. You'll see it every time you log in!</p>
+      <div class="tstub">
+        <div class="stub-n" id="sn">—</div>
+        <div class="stub-d" id="sd">—</div>
+        <div class="stub-ref" id="sref">Ref: —</div>
+        <div class="stub-bc" id="sbc"></div>
+      </div>
+      <button class="paybtn" onclick="closeM()">Done → Back to Events</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTH GUARD
+// ══════════════════════════════════════════════════════════════════════════════
+if (!sessionStorage.getItem('es_token') || sessionStorage.getItem('es_role') !== 'user') {
+  window.location.href = 'login.html';
+}
+
+const uUser  = getUser();
+const uEmail = uUser?.email || sessionStorage.getItem('es_email') || '';
+const uName  = sessionStorage.getItem('es_name') || 'User';
+const uCity  = sessionStorage.getItem('es_city')  || '';
+
+// ── Wishlist stays in localStorage (UI preference) ────────────────────────────
+const WISH_KEY = 'es_wishlist_' + uEmail;
+let wishlist = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+function saveWish() { localStorage.setItem(WISH_KEY, JSON.stringify(wishlist)); }
+
+// ── Init user UI ──────────────────────────────────────────────────────────────
+const initials = uName.split(' ').map(n=>n[0]||'').join('').toUpperCase().slice(0,2);
+document.getElementById('sAv').textContent       = initials;
+document.getElementById('sName').textContent     = uName;
+document.getElementById('greetName').textContent = uName.split(' ')[0];
+document.getElementById('profAv').textContent    = initials;
+document.getElementById('profName').textContent  = uName;
+document.getElementById('profEmail').textContent = uEmail;
+if (uUser) {
+  document.getElementById('pf-fn').value    = uUser.firstName || '';
+  document.getElementById('pf-ln').value    = uUser.lastName  || '';
+  document.getElementById('pf-email').value = uUser.email     || '';
+  document.getElementById('pf-city').value  = uUser.city      || '';
+  document.getElementById('pf-phone').value = uUser.phone     || '';
+  if (uUser.createdAt) {
+    document.getElementById('sJoined').textContent = 'Joined ' + new Date(uUser.createdAt).toLocaleDateString('en-IN',{month:'short',year:'numeric'});
+  }
+}
+document.getElementById('set-email').value = uEmail;
+
+function logout() { clearSession(); window.location.href = 'login.html'; }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EVENTS  — loaded from backend API
+// ══════════════════════════════════════════════════════════════════════════════
+let allEvents = [];
+
+async function loadEvents() {
+  try {
+    const data = await apiCall('/events');
+    allEvents = data.events || [];
+    document.getElementById('sc-avail').textContent  = allEvents.length;
+    document.getElementById('evtBadge').textContent  = allEvents.length;
+    renderGrid(allEvents.slice(0, 6), 'trendGrid');
+    renderGrid(allEvents, 'browseGrid');
+    document.getElementById('rCount').textContent = allEvents.length + ' event' + (allEvents.length!==1?'s':'') + ' found';
+  } catch (e) {
+    console.error('Failed to load events:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BOOKINGS — loaded from backend API
+// ══════════════════════════════════════════════════════════════════════════════
+let myBookings = [];
+
+async function loadMyBookings() {
+  try {
+    const data = await apiCall('/bookings/my-bookings', {}, true);
+    myBookings = data.bookings || [];
+    document.getElementById('sc-booked').textContent = myBookings.length;
+    document.getElementById('tktBadge').textContent  = myBookings.length;
+    document.getElementById('ps-b').textContent      = myBookings.length;
+    renderTickets();
+  } catch (e) {
+    console.error('Failed to load bookings:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtINR(n) {
+  return '₹' + Number(n).toLocaleString('en-IN');
+}
+function daysLeft(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff  = Math.ceil((new Date(dateStr) - today) / 86400000);
+  if (diff === 0) return '🔴 Today!';
+  if (diff === 1) return '🟡 Tomorrow';
+  if (diff <= 7)  return `🟠 ${diff} days left`;
+  return null;
+}
+
+function mkCard(ev, delay) {
+  const w   = wishlist.includes(ev._id || ev.id);
+  const id  = ev._id || ev.id;
+  const dl  = daysLeft(ev.date);
+  const el  = document.createElement('div');
+  el.className = 'ec'; el.style.animationDelay = delay + 's';
+  el.innerHTML = `
+    <div class="ec-img" style="background:${ev.bg}">
+      <span style="position:relative;z-index:1">${ev.emoji}</span>
+      <div class="ec-cat ${ev.cc}">${ev.category || ev.cat}</div>
+      <div class="ec-fav ${w?'liked':''}" data-id="${id}" onclick="toggleWish(event,'${id}')">
+        ${w?'❤️':'♡'}
+      </div>
+    </div>
+    <div class="ec-body">
+      <div class="ec-date">📅 ${fmtDate(ev.date)}${dl ? ' &nbsp;<span style="font-size:.65rem;font-weight:700">'+dl+'</span>' : ''}</div>
+      <div class="ec-title">${ev.title}</div>
+      <div class="ec-venue">📍 ${ev.venue}</div>
+      <div class="ec-foot">
+        <div class="ec-price">${fmtINR(ev.basePrice || ev.price)}</div>
+        <button class="bkbtn" onclick="openModal('${id}')">Book Now</button>
+      </div>
+    </div>`;
+  return el;
+}
+
+function renderGrid(evts, containerId) {
+  const c = document.getElementById(containerId); c.innerHTML = '';
+  if (!evts.length) {
+    c.innerHTML = '<div class="empty"><div class="ei">🔍</div><h3>No Events Found</h3><p>Try a different filter or check back later.</p></div>';
+    return;
+  }
+  evts.forEach((ev,i) => c.appendChild(mkCard(ev, i*0.07)));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WISHLIST — localStorage (UI preference only)
+// ══════════════════════════════════════════════════════════════════════════════
+function toggleWish(e, id) {
+  e.stopPropagation();
+  const strId = String(id);
+  wishlist = wishlist.includes(strId) ? wishlist.filter(x=>x!==strId) : [...wishlist, strId];
+  saveWish();
+  document.querySelectorAll(`.ec-fav[data-id="${strId}"]`).forEach(f => {
+    f.classList.toggle('liked', wishlist.includes(strId));
+    f.textContent = wishlist.includes(strId) ? '❤️' : '♡';
+  });
+  syncWishCount();
+}
+
+function syncWishCount() {
+  const wc = wishlist.length;
+  document.getElementById('sc-wish').textContent = wc;
+  document.getElementById('ps-w').textContent    = wc;
+  const wb = document.getElementById('wishBadge');
+  wb.textContent = wc; wb.style.display = wc ? '' : 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FILTER & SEARCH
+// ══════════════════════════════════════════════════════════════════════════════
+function filt(el, cat) {
+  document.querySelectorAll('#filterChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const filtered = cat === 'all' ? allEvents : allEvents.filter(e=>(e.category||e.cat)===cat);
+  document.getElementById('rCount').textContent = filtered.length + ' event' + (filtered.length!==1?'s':'') + ' found';
+  renderGrid(filtered, 'browseGrid');
+}
+
+function gSearch(q) {
+  pg('browse', document.querySelector('[onclick*=browse]'));
+  const evts = allEvents.filter(e =>
+    e.title.toLowerCase().includes(q.toLowerCase()) ||
+    e.venue.toLowerCase().includes(q.toLowerCase()) ||
+    (e.category||e.cat||'').toLowerCase().includes(q.toLowerCase())
+  );
+  document.getElementById('rCount').textContent = evts.length + ' event' + (evts.length!==1?'s':'') + ' found';
+  renderGrid(evts, 'browseGrid');
+  document.querySelectorAll('#filterChips .chip').forEach((c,i)=>c.classList.toggle('on',i===0));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TICKETS — rendered from backend data
+// ══════════════════════════════════════════════════════════════════════════════
+function getTicketStatus(dateStr) {
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const evDate = new Date(dateStr);
+  if (evDate < today) return { label: 'Attended', cls: 't-past' };
+  if (evDate.getTime() === today.getTime()) return { label: 'Today!', cls: 't-conf' };
+  return { label: 'Upcoming', cls: 't-up' };
+}
+
+function renderTickets() {
+  const list = document.getElementById('tktList');
+  list.innerHTML = '';
+  if (!myBookings.length) {
+    list.innerHTML = '<div class="empty"><div class="ei">🎟️</div><h3>No Tickets Yet</h3><p>Book your first event and it\'ll be saved here permanently.</p></div>';
+    return;
+  }
+  myBookings.forEach((b, i) => {
+    const ev   = b.event || {};
+    const date = ev.date || b.bookedAt;
+    const st   = getTicketStatus(date);
+    const el   = document.createElement('div');
+    el.className = 'tcard'; el.style.animationDelay = i*.08+'s';
+    el.innerHTML = `
+      <div class="tem">${ev.emoji || '🎟️'}</div>
+      <div class="ti">
+        <div class="tn">${ev.title || 'Event'}</div>
+        <div class="tm">
+          <span>📅 ${fmtDate(date)}</span>
+          <span>🎫 ${b.ticketType}</span>
+          <span>🪑 ×${b.quantity} seat${b.quantity>1?'s':''}</span>
+        </div>
+        <div class="tref">Ref: ${b.bookingReference}</div>
+      </div>
+      <div class="tbadge ${st.cls}">${st.label}</div>
+      <div class="tprice">${fmtINR(b.totalAmount)}</div>`;
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WISHLIST PAGE
+// ══════════════════════════════════════════════════════════════════════════════
+function renderWishlist() {
+  const evts = allEvents.filter(e => wishlist.includes(String(e._id || e.id)));
+  const c = document.getElementById('wishContent');
+  if (!evts.length) {
+    c.innerHTML = '<div class="empty"><div class="ei">❤️</div><h3>Your Wishlist is Empty</h3><p>Browse events and tap ♡ to save them here.</p></div>';
+    return;
+  }
+  c.innerHTML = '<div class="egrid" id="wishGrid"></div>';
+  evts.forEach((ev,i) => document.getElementById('wishGrid').appendChild(mkCard(ev,i*.07)));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+const pgTitles = {home:'Home',browse:'Browse Events',wishlist:'My Wishlist',tickets:'My Tickets',profile:'Profile',settings:'Settings'};
+function pg(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  if (el) el.classList.add('on');
+  document.getElementById('pgTitle').textContent = pgTitles[id] || id;
+  if (id==='tickets')  loadMyBookings();
+  if (id==='wishlist') renderWishlist();
+  if (id==='browse') {
+    renderGrid(allEvents, 'browseGrid');
+    document.getElementById('rCount').textContent = allEvents.length + ' event' + (allEvents.length!==1?'s':'') + ' found';
+    document.querySelectorAll('#filterChips .chip').forEach((c,i)=>c.classList.toggle('on',i===0));
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BOOKING MODAL
+// ══════════════════════════════════════════════════════════════════════════════
+const CONVENIENCE_FEES = { 'General Admission': 150, 'VIP Experience': 299, 'Platinum Pass': 499 };
+let curEv = null, selTier = null, qty = 1;
+
+function openModal(id) {
+  curEv = allEvents.find(e => String(e._id || e.id) === String(id));
+  if (!curEv) return;
+
+  document.getElementById('mEmo').textContent  = curEv.emoji;
+  document.getElementById('mName').textContent = curEv.title;
+  document.getElementById('mMeta').textContent = '📅 '+fmtDate(curEv.date)+' · 📍 '+curEv.venue;
+  document.getElementById('bookErr').style.display = 'none';
+
+  // Build ticket options from backend ticketTypes
+  const opts = document.getElementById('ticketOptions');
+  opts.innerHTML = '';
+  (curEv.ticketTypes || []).forEach((t, i) => {
+    const soldOut = t.availableQuantity === 0;
+    const div = document.createElement('div');
+    div.className = 'topt' + (i===0&&!soldOut?' sel':'') + (soldOut?' sold-out':'');
+    div.innerHTML = `
+      <div>
+        <div class="to-n">${t.name}</div>
+        <div class="to-d">${t.name === 'General Admission' ? 'All main areas access' : t.name === 'VIP Experience' ? 'Front row + lounge access' : 'All-inclusive + meet & greet'}</div>
+        <div class="to-avail">${soldOut ? '🔴 Sold out' : t.availableQuantity + ' left'}</div>
+      </div>
+      <div class="to-p">${fmtINR(t.price)}</div>`;
+    if (!soldOut) {
+      div.onclick = () => {
+        document.querySelectorAll('.topt').forEach(o=>o.classList.remove('sel'));
+        div.classList.add('sel');
+        selTier = t;
+        updSum();
+      };
+    }
+    opts.appendChild(div);
+    if (i === 0 && !soldOut) selTier = t;
+  });
+
+  qty = 1;
+  document.getElementById('qNum').textContent = '1';
+  document.getElementById('mMain').style.display = '';
+  document.getElementById('mSucc').style.display = 'none';
+  updSum();
+  document.getElementById('modal').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeM() {
+  document.getElementById('modal').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+function chQ(d) {
+  if (!selTier) return;
+  const max = Math.min(10, selTier.availableQuantity);
+  qty = Math.max(1, Math.min(max, qty + d));
+  document.getElementById('qNum').textContent = qty;
+  updSum();
+}
+
+function updSum() {
+  if (!selTier) return;
+  const p = selTier.price;
+  const f = CONVENIENCE_FEES[selTier.name] ?? 150;
+  document.getElementById('sm-p').textContent = fmtINR(p);
+  document.getElementById('sm-q').textContent = '× ' + qty;
+  document.getElementById('sm-f').textContent = fmtINR(f);
+  document.getElementById('sm-t').textContent = fmtINR(p * qty + f);
+}
+
+// ── Confirm & Pay (calls backend) ─────────────────────────────────────────────
+async function confirmBook() {
+  if (!curEv || !selTier) return;
+  document.getElementById('bookErr').style.display = 'none';
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Processing…';
+
+  try {
+    const data = await apiCall('/bookings', {
+      method: 'POST',
+      body: JSON.stringify({
+        eventId:    curEv._id || curEv.id,
+        ticketType: selTier.name,
+        quantity:   qty,
+      }),
+    }, true);
+
+    const b = data.booking;
+
+    // Update local availability
+    const tier = curEv.ticketTypes.find(t => t.name === selTier.name);
+    if (tier) tier.availableQuantity -= qty;
+
+    // Show success screen
+    document.getElementById('mMain').style.display = 'none';
+    document.getElementById('mSucc').style.display  = 'block';
+    document.getElementById('sn').textContent   = curEv.title;
+    document.getElementById('sd').textContent   = fmtDate(curEv.date) + ' · ' + curEv.venue;
+    document.getElementById('sref').textContent = 'Ref: ' + b.bookingReference;
+
+    // Barcode decoration
+    const bc = document.getElementById('sbc'); bc.innerHTML = '';
+    for (let i = 0; i < 40; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bb';
+      bar.style.height = (Math.random() * 22 + 10) + 'px';
+      bc.appendChild(bar);
+    }
+
+    // Refresh bookings count
+    await loadMyBookings();
+  } catch (e) {
+    document.getElementById('bookErrT').textContent = e.message || 'Booking failed. Please try again.';
+    document.getElementById('bookErr').style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔒 Confirm & Pay';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PROFILE SAVE (calls backend)
+// ══════════════════════════════════════════════════════════════════════════════
+async function saveProfile() {
+  const fn    = document.getElementById('pf-fn').value.trim();
+  const ln    = document.getElementById('pf-ln').value.trim();
+  const city  = document.getElementById('pf-city').value.trim();
+  const phone = document.getElementById('pf-phone').value.trim();
+  if (!fn) return;
+
+  const msg = document.getElementById('profileMsg');
+  msg.style.display = 'block';
+  msg.style.color = 'var(--mut)';
+  msg.textContent = 'Saving…';
+
+  try {
+    const data = await apiCall('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify({ firstName: fn, lastName: ln, city, phone }),
+    }, true);
+
+    // Update session
+    const u = data.user;
+    const newName = u.firstName + ' ' + u.lastName;
+    sessionStorage.setItem('es_name', newName);
+    sessionStorage.setItem('es_city', u.city || '');
+    sessionStorage.setItem('es_user', JSON.stringify(u));
+
+    const ini = newName.split(' ').map(x=>x[0]||'').join('').toUpperCase().slice(0,2);
+    document.getElementById('profName').textContent  = newName;
+    document.getElementById('sName').textContent     = newName;
+    document.getElementById('greetName').textContent = u.firstName;
+    document.getElementById('sAv').textContent   = ini;
+    document.getElementById('profAv').textContent = ini;
+
+    msg.style.color = '#34d399';
+    msg.textContent = '✓ Profile saved successfully!';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  } catch (e) {
+    msg.style.color = '#f87171';
+    msg.textContent = '✗ ' + (e.message || 'Failed to save.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════════
+syncWishCount();
+loadEvents();
+loadMyBookings();
+</script>
+</body>
+</html>
