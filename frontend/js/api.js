@@ -4,7 +4,7 @@
  */
 
 // Change this to your production URL when deploying
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://event-sphere-backend-nine.vercel.app/';
 
 /**
  * Makes an authenticated API request.

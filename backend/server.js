@@ -30,7 +30,7 @@ app.use(
 // ── CORS ───────────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: ['http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:3000'],
+    origin: ['http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:3000', 'https://event-sphere-eight-ruby.vercel.app'],
     credentials: true,
   })
 );
