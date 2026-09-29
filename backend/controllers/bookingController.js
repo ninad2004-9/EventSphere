@@ -143,10 +143,52 @@ const getBookingById = async (req, res) => {
   }
 };
 
-// ── GET /api/admin/bookings ────────────────────────────────────────────────────
+// ── GET /api/bookings/admin/all?eventId=&date= ────────────────────────────────
+// Admin: get all bookings with optional filters
+//   ?eventId=<mongoId>   — filter by specific event
+//   ?date=YYYY-MM-DD     — filter by the EVENT's scheduled date (not booking date)
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find()
+    const { eventId, date } = req.query;
+
+    // Build the booking-level filter
+    const bookingFilter = {};
+
+    // ── Event filter ───────────────────────────────────────────────────────────
+    if (eventId && eventId !== 'all' && eventId !== '') {
+      bookingFilter.event = eventId;
+    }
+
+    // ── Date filter (matches the EVENT's date, not the booking creation date) ──
+    if (date && date !== '') {
+      // Parse the date string and build a day-wide range to avoid timezone issues
+      const [year, month, day] = date.split('-').map(Number);
+      const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      const endOfDay   = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+      // Find all events occurring on this calendar day
+      const Event = require('../models/Event');
+      const matchingEvents = await Event.find({
+        date: { $gte: startOfDay, $lte: endOfDay },
+      }).select('_id');
+
+      const matchingIds = matchingEvents.map(e => e._id);
+
+      if (bookingFilter.event) {
+        // Both eventId AND date filters active: check if the chosen event falls on that date
+        const eventInList = matchingIds.some(id => id.toString() === bookingFilter.event);
+        if (!eventInList) {
+          // The specific event doesn't occur on this date → return empty result
+          return res.status(200).json({ success: true, count: 0, bookings: [] });
+        }
+        // bookingFilter.event already set — no change needed
+      } else {
+        // Only date filter active
+        bookingFilter.event = { $in: matchingIds };
+      }
+    }
+
+    const bookings = await Booking.find(bookingFilter)
       .populate('user',  'firstName lastName email city')
       .populate('event', 'title emoji category date venue')
       .sort({ bookedAt: -1 });
@@ -159,3 +201,4 @@ const getAllBookings = async (req, res) => {
 };
 
 module.exports = { createBooking, getMyBookings, getBookingById, getAllBookings };
+

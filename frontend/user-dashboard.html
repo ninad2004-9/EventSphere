@@ -654,31 +654,63 @@ function openModal(id) {
   document.getElementById('mMeta').textContent = '📅 '+fmtDate(curEv.date)+' · 📍 '+curEv.venue;
   document.getElementById('bookErr').style.display = 'none';
 
-  // Build ticket options from backend ticketTypes
+  // ── Resolve ticket tiers ───────────────────────────────────────────────────
+  // If the DB returns an empty ticketTypes array (can happen if events were seeded
+  // with insertMany which bypasses pre-save hooks), generate the three standard
+  // tiers from basePrice so the modal always shows options.
+  let ticketTypes = (curEv.ticketTypes || []).filter(t => t && t.name);
+  if (!ticketTypes.length && curEv.basePrice) {
+    const p   = Number(curEv.basePrice);
+    const cap = Number(curEv.totalCapacity) || 500;
+    ticketTypes = [
+      { name: 'General Admission', price: p,                   availableQuantity: Math.floor(cap * 0.6) },
+      { name: 'VIP Experience',    price: Math.round(p * 2.5), availableQuantity: Math.floor(cap * 0.3) },
+      { name: 'Platinum Pass',     price: Math.round(p * 5),   availableQuantity: Math.floor(cap * 0.1) },
+    ];
+    // Patch the local event object so confirmBook() sees the same tiers
+    curEv._fallbackTiers = ticketTypes;
+  } else {
+    curEv._fallbackTiers = null;
+  }
+
+  // Reset selection
+  selTier = null;
+
+  // ── Build ticket option cards ──────────────────────────────────────────────
   const opts = document.getElementById('ticketOptions');
   opts.innerHTML = '';
-  (curEv.ticketTypes || []).forEach((t, i) => {
+  ticketTypes.forEach((t, i) => {
     const soldOut = t.availableQuantity === 0;
     const div = document.createElement('div');
-    div.className = 'topt' + (i===0&&!soldOut?' sel':'') + (soldOut?' sold-out':'');
+    div.className = 'topt' + (i === 0 && !soldOut ? ' sel' : '') + (soldOut ? ' sold-out' : '');
+    const descMap = {
+      'General Admission': 'All main areas access',
+      'VIP Experience':    'Front row + lounge access',
+      'Platinum Pass':     'All-inclusive + meet & greet',
+    };
     div.innerHTML = `
       <div>
         <div class="to-n">${t.name}</div>
-        <div class="to-d">${t.name === 'General Admission' ? 'All main areas access' : t.name === 'VIP Experience' ? 'Front row + lounge access' : 'All-inclusive + meet & greet'}</div>
-        <div class="to-avail">${soldOut ? '🔴 Sold out' : t.availableQuantity + ' left'}</div>
+        <div class="to-d">${descMap[t.name] || 'Standard access'}</div>
+        <div class="to-avail">${soldOut ? '🔴 Sold out' : t.availableQuantity + ' available'}</div>
       </div>
       <div class="to-p">${fmtINR(t.price)}</div>`;
     if (!soldOut) {
       div.onclick = () => {
-        document.querySelectorAll('.topt').forEach(o=>o.classList.remove('sel'));
+        document.querySelectorAll('.topt').forEach(o => o.classList.remove('sel'));
         div.classList.add('sel');
         selTier = t;
         updSum();
       };
+      // Auto-select the first available tier
+      if (i === 0) { selTier = t; }
     }
     opts.appendChild(div);
-    if (i === 0 && !soldOut) selTier = t;
   });
+
+  if (!ticketTypes.length) {
+    opts.innerHTML = '<div style="color:var(--mut);padding:14px;text-align:center;font-size:.85rem">⚠ No ticket types available for this event.</div>';
+  }
 
   qty = 1;
   document.getElementById('qNum').textContent = '1';
@@ -714,11 +746,15 @@ function updSum() {
 
 // ── Confirm & Pay (calls backend) ─────────────────────────────────────────────
 async function confirmBook() {
-  if (!curEv || !selTier) return;
+  if (!curEv || !selTier) {
+    document.getElementById('bookErrT').textContent = 'Please select a ticket type first.';
+    document.getElementById('bookErr').style.display = 'flex';
+    return;
+  }
   document.getElementById('bookErr').style.display = 'none';
   const btn = document.getElementById('payBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Processing…';
+  btn.innerHTML = '⏳ Processing…';
 
   try {
     const data = await apiCall('/bookings', {
@@ -732,13 +768,14 @@ async function confirmBook() {
 
     const b = data.booking;
 
-    // Update local availability
-    const tier = curEv.ticketTypes.find(t => t.name === selTier.name);
-    if (tier) tier.availableQuantity -= qty;
+    // Update local availability (works for both DB tiers and fallback tiers)
+    const tiers = curEv._fallbackTiers || curEv.ticketTypes || [];
+    const tier  = tiers.find(t => t.name === selTier.name);
+    if (tier) tier.availableQuantity = Math.max(0, tier.availableQuantity - qty);
 
-    // Show success screen
+    // ── Show success screen ────────────────────────────────────────────────────
     document.getElementById('mMain').style.display = 'none';
-    document.getElementById('mSucc').style.display  = 'block';
+    document.getElementById('mSucc').style.display = 'block';
     document.getElementById('sn').textContent   = curEv.title;
     document.getElementById('sd').textContent   = fmtDate(curEv.date) + ' · ' + curEv.venue;
     document.getElementById('sref').textContent = 'Ref: ' + b.bookingReference;
@@ -752,8 +789,9 @@ async function confirmBook() {
       bc.appendChild(bar);
     }
 
-    // Refresh bookings count
+    // ── Immediately refresh My Tickets ────────────────────────────────────────
     await loadMyBookings();
+
   } catch (e) {
     document.getElementById('bookErrT').textContent = e.message || 'Booking failed. Please try again.';
     document.getElementById('bookErr').style.display = 'flex';

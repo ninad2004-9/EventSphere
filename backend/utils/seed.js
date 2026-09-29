@@ -95,12 +95,17 @@ const seed = async () => {
   }
 
   // ── 2. Sample Events ─────────────────────────────────────────────────────────
+  // NOTE: We use individual .save() calls (NOT insertMany) so that the
+  // Mongoose pre-save hook fires for each event, which auto-generates the
+  // three ticket tiers (General / VIP / Platinum) from basePrice.
   const eventCount = await Event.countDocuments();
   if (eventCount > 0) {
     console.log(`ℹ️  Events already exist (${eventCount} found) — skipping event seed.`);
   } else {
-    await Event.insertMany(sampleEvents);
-    console.log(`✅ Inserted ${sampleEvents.length} sample events.`);
+    for (const evData of sampleEvents) {
+      await new Event(evData).save();
+    }
+    console.log(`✅ Inserted ${sampleEvents.length} sample events (with ticket tiers generated).`);
   }
 
   console.log('\n🎉 Seeding complete!');
@@ -109,7 +114,49 @@ const seed = async () => {
   process.exit(0);
 };
 
-seed().catch((err) => {
-  console.error('Seed error:', err);
-  process.exit(1);
-});
+// ── Extra command: --fix-events ────────────────────────────────────────────────
+// Run: node utils/seed.js --fix-events
+// Repairs existing events in DB that are missing ticketTypes (created via insertMany)
+const fixEvents = async () => {
+  await connectDB();
+  const events = await Event.find({ ticketTypes: { $size: 0 } });
+  if (!events.length) {
+    console.log('✅ All events already have ticket tiers. Nothing to fix.');
+    process.exit(0);
+  }
+  console.log(`🔧 Found ${events.length} event(s) with empty ticketTypes — fixing...`);
+  for (const ev of events) {
+    ev.ticketTypes = []; // triggers pre-save hook to regenerate
+    await ev.save();
+    console.log(`   Fixed: ${ev.title}`);
+  }
+  console.log('✅ All events fixed!');
+  process.exit(0);
+};
+
+// ── Extra command: --reseed ────────────────────────────────────────────────────
+// Run: node utils/seed.js --reseed
+// Drops all events and re-inserts them (useful for development)
+const reseed = async () => {
+  await connectDB();
+  await Event.deleteMany({});
+  console.log('🗑️  Cleared all existing events.');
+  for (const evData of sampleEvents) {
+    await new Event(evData).save();
+  }
+  console.log(`✅ Re-inserted ${sampleEvents.length} events with ticket tiers.`);
+  process.exit(0);
+};
+
+const arg = process.argv[2];
+if (arg === '--fix-events') {
+  fixEvents().catch(err => { console.error(err); process.exit(1); });
+} else if (arg === '--reseed') {
+  reseed().catch(err => { console.error(err); process.exit(1); });
+} else {
+  seed().catch((err) => {
+    console.error('Seed error:', err);
+    process.exit(1);
+  });
+}
+
