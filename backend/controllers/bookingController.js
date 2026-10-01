@@ -35,6 +35,19 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: 'This event is not available for booking.' });
     }
 
+    // --- Auto-heal: if ticketTypes is empty (old insertMany seed), regenerate and save ---
+    if (!event.ticketTypes || event.ticketTypes.length === 0) {
+      const p   = event.basePrice;
+      const cap = event.totalCapacity || 500;
+      event.ticketTypes = [
+        { name: 'General Admission', price: p,                   availableQuantity: Math.floor(cap * 0.6) },
+        { name: 'VIP Experience',    price: Math.round(p * 2.5), availableQuantity: Math.floor(cap * 0.3) },
+        { name: 'Platinum Pass',     price: Math.round(p * 5),   availableQuantity: Math.floor(cap * 0.1) },
+      ];
+      await event.save({ validateBeforeSave: false });
+      console.log(`🔧 Auto-healed ticketTypes for event: ${event.title}`);
+    }
+
     // --- Check ticket type exists and has availability ---
     const tier = event.ticketTypes.find((t) => t.name === ticketType);
     if (!tier) {
@@ -104,6 +117,7 @@ const createBooking = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error. Please try again.' });
   }
 };
+
 
 // ── GET /api/bookings/my-bookings ─────────────────────────────────────────────
 const getMyBookings = async (req, res) => {

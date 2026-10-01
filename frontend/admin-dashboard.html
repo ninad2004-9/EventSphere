@@ -185,6 +185,8 @@ input[type=date]{color-scheme:dark;}
 
 @keyframes fuUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.srow{grid-template-columns:1fr 1fr}.srow5{grid-template-columns:1fr 1fr}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
 </style>
 </head>
 <body>
@@ -536,25 +538,16 @@ async function loadEvents() {
     document.getElementById('evBadge').textContent = allEvents.length;
     renderTables();
     drawDonut();
+    // Populate the event filter dropdown in the Bookings page
+    populateEventDropdown();
   } catch (e) {
     console.error('Load events error:', e);
     toast('❌', 'Failed to load events.', 'rgba(239,68,68,.3)');
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LOAD BOOKINGS (admin)
-// ══════════════════════════════════════════════════════════════════════════════
-async function loadBookings() {
-  try {
-    const data = await apiCall('/bookings/admin/all', {}, true);
-    allBookings = data.bookings || [];
-    document.getElementById('bkBadge').textContent = allBookings.length;
-    renderBookings();
-  } catch (e) {
-    console.error('Load bookings error:', e);
-  }
-}
+// (loadBookings, applyFilters, clearFilters, and renderBookings are defined below — after renderUsers)
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOAD USERS (admin)
@@ -638,29 +631,114 @@ function renderUsers() {
   </tr>`).join('');
 }
 
-function renderBookings() {
-  const count = allBookings.length;
-  document.getElementById('bkCount').textContent = count + ' booking' + (count!==1?'s':'');
+// ── Populate event dropdown in bookings filter ────────────────────────────────
+function populateEventDropdown() {
+  const sel = document.getElementById('flt-event');
+  if (!sel) return;
+  // Keep "All Events" option, rebuild the rest
+  sel.innerHTML = '<option value="all">🌟 All Events</option>';
+  allEvents.forEach(ev => {
+    const opt = document.createElement('option');
+    opt.value       = ev._id;
+    opt.textContent = ev.emoji + ' ' + ev.title;
+    sel.appendChild(opt);
+  });
+}
+
+// ── loadBookings — fetches from backend with optional filters ─────────────────
+async function loadBookings() {
   const tb = document.getElementById('bookingsTbody');
+  tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--mut)">
+    <div style="display:inline-block;width:22px;height:22px;border:2px solid var(--bdr);border-top-color:var(--pur);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px"></div>
+    <div>Loading bookings…</div></td></tr>`;
+
+  const eventId = (document.getElementById('flt-event')?.value || 'all');
+  const date    = (document.getElementById('flt-date')?.value || '');
+
+  // Build query string
+  const params = new URLSearchParams();
+  if (eventId && eventId !== 'all') params.append('eventId', eventId);
+  if (date) params.append('date', date);
+  const qs = params.toString() ? '?' + params.toString() : '';
+
+  // Show/hide "Filters active" indicator
+  const hasFilter = (eventId !== 'all') || !!date;
+  const fltActive = document.getElementById('flt-active');
+  if (fltActive) fltActive.style.display = hasFilter ? '' : 'none';
+
+  try {
+    const data = await apiCall('/bookings/admin/all' + qs, {}, true);
+    allBookings = data.bookings || [];
+    document.getElementById('bkBadge').textContent = allBookings.length;
+    renderBookings(hasFilter);
+  } catch (e) {
+    tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#f87171">⚠ Failed to load bookings. Please try again.</td></tr>`;
+    document.getElementById('bkCount').textContent = '';
+  }
+}
+
+// ── applyFilters / clearFilters ───────────────────────────────────────────────
+function applyFilters() { loadBookings(); }
+
+function clearFilters() {
+  const evSel = document.getElementById('flt-event');
+  const dtIn  = document.getElementById('flt-date');
+  if (evSel) evSel.value = 'all';
+  if (dtIn)  dtIn.value  = '';
+  const fltActive = document.getElementById('flt-active');
+  if (fltActive) fltActive.style.display = 'none';
+  loadBookings();
+}
+
+// ── renderBookings ────────────────────────────────────────────────────────────
+function renderBookings(filtersActive = false) {
+  const count = allBookings.length;
+  document.getElementById('bkCount').textContent = count + ' booking' + (count !== 1 ? 's' : '');
+  const tb = document.getElementById('bookingsTbody');
+
   if (!count) {
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--mut)">No bookings yet.</td></tr>';
+    const msg = filtersActive
+      ? 'No bookings found for the selected filters.'
+      : 'No bookings yet. Bookings will appear here after users complete a purchase.';
+    tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:44px;color:var(--mut)">
+      <div style="font-size:2rem;margin-bottom:10px">${filtersActive ? '🔍' : '🎟️'}</div>
+      <div style="font-weight:600;color:var(--txt);margin-bottom:6px">${filtersActive ? 'No Results' : 'No Bookings Yet'}</div>
+      <div style="font-size:.82rem">${msg}</div>
+    </td></tr>`;
     return;
   }
+
   tb.innerHTML = allBookings.map(b => {
-    const u = b.user || {};
+    const u = b.user  || {};
     const e = b.event || {};
+    // Show the EVENT's scheduled date in "Event Date" column
+    // and the booking creation time in "Booked On" column
+    const eventDateStr  = e.date    ? fmtDate(e.date)    : '—';
+    const bookedOnStr   = b.bookedAt ? fmtDate(b.bookedAt) : '—';
+    const bStatus = (b.bookingStatus || 'confirmed').toLowerCase();
+    const pStatus = (b.paymentStatus || 'paid').toLowerCase();
     return `<tr>
-      <td><code style="font-size:.72rem;color:#a78bfa">${b.bookingReference}</code></td>
-      <td><div class="tdn">${u.firstName||''} ${u.lastName||''}</div><div class="tdv">${u.email||''}</div></td>
-      <td><div class="tdn">${e.title||'—'}</div><div class="tdv">${e.category||''}</div></td>
-      <td>${b.ticketType}</td>
-      <td>${b.quantity}</td>
+      <td><code style="font-size:.72rem;color:#a78bfa;letter-spacing:.04em">${b.bookingReference}</code></td>
+      <td>
+        <div class="tdn">${u.firstName || ''} ${u.lastName || ''}</div>
+        <div class="tdv">${u.email || ''}</div>
+      </td>
+      <td>
+        <div class="tdn">${e.title || '—'}</div>
+        <div class="tdv">${e.category || ''}</div>
+      </td>
+      <td style="font-size:.82rem">${b.ticketType}</td>
+      <td style="font-weight:700;font-family:'Syne',sans-serif">${b.quantity}</td>
       <td><strong style="color:#34d399">${fmtINR(b.totalAmount)}</strong></td>
-      <td style="font-size:.78rem">${fmtDate(b.bookedAt)}</td>
-      <td><span class="stbadge ${b.bookingStatus==='confirmed'?'st-a':'st-d'}">${b.bookingStatus}</span></td>
+      <td style="font-size:.8rem">${eventDateStr}</td>
+      <td style="font-size:.8rem;color:var(--mut)">${bookedOnStr}</td>
+      <td>
+        <span class="stbadge ${bStatus === 'confirmed' ? 'st-a' : 'st-d'}">${bStatus}</span>
+      </td>
     </tr>`;
   }).join('');
 }
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // CHARTS
