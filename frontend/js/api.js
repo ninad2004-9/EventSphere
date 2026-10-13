@@ -3,8 +3,13 @@
  * All fetch calls go through apiCall() so the base URL is one place to change.
  */
 
-// Change this to your production URL when deploying
-const API_BASE = 'https://event-sphere-backend-nine.vercel.app/api';;
+// Dynamically adapt to local development or deployed production URL
+const API_BASE = (typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.protocol === 'file:'
+)) ? 'http://localhost:5000/api'
+   : 'https://event-sphere-backend-nine.vercel.app/api';
 
 /**
  * Makes an authenticated API request.

@@ -206,6 +206,52 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 .cc{background:rgba(99,102,241,.14);color:#818cf8;}
 .bw2{background:rgba(20,184,166,.14);color:#2dd4bf;}
 
+/* ── TICKET FILTER CHIPS ── */
+.tfilter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.tfc{padding:7px 17px;border-radius:100px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.tfc:hover{color:var(--txt);border-color:rgba(255,92,53,.3);}
+.tfc.on{background:var(--acc);border-color:var(--acc);color:#fff;}
+
+/* ── ENHANCED TICKET CARDS ── */
+.tcard2{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;transition:all .35s;animation:fuUp .4s ease both;margin-bottom:14px;}
+.tcard2:hover{border-color:rgba(255,92,53,.22);box-shadow:0 8px 30px rgba(0,0,0,.3);}
+.tcard2.past{border-color:rgba(107,114,128,.18);opacity:.82;}
+.tc2-head{display:flex;align-items:center;gap:16px;padding:20px 22px 16px;}
+.tc2-emo{width:56px;height:56px;border-radius:13px;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.tc2-info{flex:1;min-width:0;}
+.tc2-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tc2-meta{font-size:.78rem;color:var(--mut);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:5px;}
+.tc2-ref{font-size:.67rem;color:var(--mut);font-family:monospace;letter-spacing:.04em;}
+.tc2-status{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.tc2-price{font-family:'Syne',sans-serif;font-weight:700;color:var(--acc);font-size:1.05rem;}
+.tc2-foot{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;gap:10px;align-items:center;justify-content:flex-end;background:rgba(255,255,255,.015);}
+.tc2-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .25s;border:1px solid;font-family:'DM Sans',sans-serif;}
+.tc2-qr{background:rgba(124,58,237,.1);color:#a78bfa;border-color:rgba(124,58,237,.22);}
+.tc2-qr:hover{background:rgba(124,58,237,.2);}
+.tc2-dl{background:rgba(255,92,53,.1);color:var(--acc);border-color:rgba(255,92,53,.22);}
+.tc2-dl:hover{background:var(--acc);color:#fff;}
+.tc2-dl.disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── TICKET VIEW MODAL ── */
+.tview-modal{max-width:520px;}
+.tv-header{background:linear-gradient(135deg,var(--acc),#ff8c00);padding:24px;border-radius:15px;margin-bottom:20px;position:relative;overflow:hidden;}
+.tv-header::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);}
+.tv-header::after{content:'';position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06);}
+.tv-event-name{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;position:relative;z-index:1;}
+.tv-event-sub{font-size:.82rem;opacity:.85;position:relative;z-index:1;}
+.tv-body{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;}
+.tv-details{display:flex;flex-direction:column;gap:10px;}
+.tv-row{display:flex;flex-direction:column;gap:2px;}
+.tv-lbl{font-size:.67rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;}
+.tv-val{font-size:.88rem;font-weight:500;}
+.tv-ref{font-family:monospace;font-size:.82rem;color:var(--acc);letter-spacing:.06em;}
+.tv-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.tv-qr-box{background:#fff;border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:center;}
+.tv-qr-box canvas{display:block;}
+.tv-qr-lbl{font-size:.67rem;color:var(--mut);text-align:center;}
+.tv-divider{border:none;border-top:1px dashed rgba(255,255,255,.1);margin:18px 0;}
+.tv-footer{display:flex;gap:10px;}
+
 @keyframes fuUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.srow{grid-template-columns:1fr 1fr}}
 </style>
@@ -294,9 +340,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 
     <!-- TICKETS PAGE -->
     <div class="page" id="page-tickets">
-      <div class="sh" style="margin-bottom:8px"><div class="sh-t">🎟️ My Tickets</div></div>
-      <div class="info-banner">✅ Your tickets are saved from MongoDB and will appear here every time you log in.</div>
-      <div class="tlist" id="tktList"></div>
+      <div class="sh" style="margin-bottom:18px">
+        <div class="sh-t">🎟️ My Tickets</div>
+        <span style="color:var(--mut);font-size:.82rem" id="tktCount"></span>
+      </div>
+      <!-- Ticket filter chips -->
+      <div class="tfilter">
+        <div class="tfc on" onclick="filterTickets('all',this)">🌟 All Tickets</div>
+        <div class="tfc" onclick="filterTickets('upcoming',this)">⏳ Upcoming</div>
+        <div class="tfc" onclick="filterTickets('attended',this)">✅ Attended</div>
+      </div>
+      <div id="tktList"></div>
     </div>
 
     <!-- PROFILE PAGE -->
@@ -565,46 +619,295 @@ function gSearch(q) {
   document.querySelectorAll('#filterChips .chip').forEach((c,i)=>c.classList.toggle('on',i===0));
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// TICKETS — rendered from backend data
-// ══════════════════════════════════════════════════════════════════════════════
+
 function getTicketStatus(dateStr) {
   const today  = new Date(); today.setHours(0,0,0,0);
   const evDate = new Date(dateStr);
-  if (evDate < today) return { label: 'Attended', cls: 't-past' };
-  if (evDate.getTime() === today.getTime()) return { label: 'Today!', cls: 't-conf' };
-  return { label: 'Upcoming', cls: 't-up' };
+  if (evDate < today) return { label: 'Attended', cls: 't-past', filter: 'attended' };
+  if (evDate.getTime() === today.getTime()) return { label: 'Today!', cls: 't-conf', filter: 'upcoming' };
+  return { label: 'Upcoming', cls: 't-up', filter: 'upcoming' };
+}
+
+let ticketFilter = 'all';
+
+function filterTickets(f, el) {
+  ticketFilter = f;
+  document.querySelectorAll('#tktFilters .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  renderTickets();
 }
 
 function renderTickets() {
   const list = document.getElementById('tktList');
   list.innerHTML = '';
-  if (!myBookings.length) {
-    list.innerHTML = '<div class="empty"><div class="ei">🎟️</div><h3>No Tickets Yet</h3><p>Book your first event and it\'ll be saved here permanently.</p></div>';
+
+  let filtered = myBookings;
+  if (ticketFilter !== 'all') {
+    filtered = myBookings.filter(b => {
+      const ev = b.event || {};
+      const st = getTicketStatus(ev.date || b.bookedAt);
+      return st.filter === ticketFilter;
+    });
+  }
+
+  const total = myBookings.length;
+  const count = filtered.length;
+  document.getElementById('tktCount').textContent = total ? (count + ' of ' + total + ' booking' + (total !== 1 ? 's' : '')) : '';
+
+  if (!total) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="ei">🎟️</div>
+        <h3>No Tickets Yet</h3>
+        <p style="margin-bottom:18px">Book your first event and your ticket will appear here.</p>
+        <button class="btn" onclick="pg('browse',document.querySelector('[onclick*=browse]'))">Browse Events →</button>
+      </div>`;
     return;
   }
-  myBookings.forEach((b, i) => {
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="ei">🔍</div>
+        <h3>No ${ticketFilter === 'upcoming' ? 'Upcoming' : 'Attended'} Tickets</h3>
+        <p>Switch filters to see all your bookings.</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach((b, i) => {
     const ev   = b.event || {};
     const date = ev.date || b.bookedAt;
     const st   = getTicketStatus(date);
+    const isValid = b.bookingStatus === 'confirmed' && b.paymentStatus === 'paid';
     const el   = document.createElement('div');
-    el.className = 'tcard'; el.style.animationDelay = i*.08+'s';
+    el.className = 'tcard2' + (st.filter === 'attended' ? ' past' : '');
+    el.style.animationDelay = i * .07 + 's';
     el.innerHTML = `
-      <div class="tem">${ev.emoji || '🎟️'}</div>
-      <div class="ti">
-        <div class="tn">${ev.title || 'Event'}</div>
-        <div class="tm">
-          <span>📅 ${fmtDate(date)}</span>
-          <span>🎫 ${b.ticketType}</span>
-          <span>🪑 ×${b.quantity} seat${b.quantity>1?'s':''}</span>
+      <div class="tc2-head">
+        <div class="tc2-emo">${ev.emoji || '🎟️'}</div>
+        <div class="tc2-info">
+          <div class="tc2-title">${ev.title || 'Event'}</div>
+          <div class="tc2-meta">
+            <span>📅 ${fmtDate(date)}</span>
+            <span>📍 ${ev.venue || '—'}</span>
+          </div>
+          <div class="tc2-meta">
+            <span>🎫 ${b.ticketType}</span>
+            <span>🪑 ${b.quantity} seat${b.quantity > 1 ? 's' : ''}</span>
+          </div>
+          <div class="tc2-ref">REF: ${b.bookingReference}</div>
         </div>
-        <div class="tref">Ref: ${b.bookingReference}</div>
+        <div class="tc2-status">
+          <span class="tbadge ${st.cls}">${st.label}</span>
+          <div class="tc2-price">${fmtINR(b.totalAmount)}</div>
+        </div>
       </div>
-      <div class="tbadge ${st.cls}">${st.label}</div>
-      <div class="tprice">${fmtINR(b.totalAmount)}</div>`;
+      <div class="tc2-foot">
+        <button class="tc2-btn tc2-qr" onclick="viewTicket('${b._id}')">
+          🔍 View Ticket &amp; QR
+        </button>
+        <button class="tc2-btn tc2-dl${isValid ? '' : ' disabled'}" onclick="${isValid ? `downloadTicketPDF('${b._id}')` : 'void 0'}">
+          ⬇️ Download PDF
+        </button>
+      </div>`;
     list.appendChild(el);
   });
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// VIEW TICKET MODAL — QR Code
+// ══════════════════════════════════════════════════════════════════════════════
+function viewTicket(bookingId) {
+  const b  = myBookings.find(x => x._id === bookingId);
+  if (!b) return;
+  const ev = b.event || {};
+  const date = ev.date || b.bookedAt;
+
+  // Remove any existing ticket view modal
+  const existing = document.getElementById('ticketViewModal');
+  if (existing) existing.remove();
+
+  const over = document.createElement('div');
+  over.className = 'mover on';
+  over.id = 'ticketViewModal';
+  over.onclick = e => { if (e.target === over) over.remove(); };
+
+  over.innerHTML = `
+    <div class="modal" style="max-width:520px">
+      <div class="mh">
+        <div class="mh-t">🎟️ Your Ticket</div>
+        <button class="mclose" onclick="document.getElementById('ticketViewModal').remove()">✕</button>
+      </div>
+      <div class="mb">
+        <!-- Event header banner -->
+        <div style="background:linear-gradient(135deg,var(--acc),#ff8c00);padding:22px;border-radius:13px;margin-bottom:18px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-25px;right:-25px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)"></div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:3px;position:relative;z-index:1">
+            ${ev.emoji || '🎟️'} ${ev.title || 'Event'}
+          </div>
+          <div style="font-size:.82rem;opacity:.88;position:relative;z-index:1">📅 ${fmtDate(date)} · 📍 ${ev.venue || '—'}</div>
+        </div>
+
+        <!-- Details + QR grid -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;margin-bottom:18px;">
+          <div style="display:flex;flex-direction:column;gap:11px;">
+            <div><div style="font-size:.65rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Booking Reference</div>
+              <div style="font-family:monospace;font-size:.88rem;color:var(--acc);letter-spacing:.06em;font-weight:700">${b.bookingReference}</div></div>
+            <div><div style="font-size:.65rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Ticket Type</div>
+              <div style="font-size:.88rem">${b.ticketType}</div></div>
+            <div><div style="font-size:.65rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Seats</div>
+              <div style="font-size:.88rem">${b.quantity} seat${b.quantity > 1 ? 's' : ''}</div></div>
+            <div><div style="font-size:.65rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Total Paid</div>
+              <div style="font-size:.88rem;font-weight:700;color:var(--acc)">${fmtINR(b.totalAmount)}</div></div>
+            <div><div style="font-size:.65rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Status</div>
+              <div style="font-size:.88rem;color:#34d399;font-weight:600">${b.bookingStatus || 'confirmed'}</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:7px;">
+            <div style="background:#fff;border-radius:10px;padding:9px;display:flex;align-items:center;justify-content:center;">
+              <canvas id="qrCanvas_${bookingId}" width="140" height="140"></canvas>
+            </div>
+            <div style="font-size:.67rem;color:var(--mut);text-align:center">Scan at entry</div>
+          </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div style="border-top:1px dashed rgba(255,255,255,.1);padding-top:16px;display:flex;gap:10px;">
+          <button class="tc2-btn tc2-dl" style="flex:1;justify-content:center" onclick="downloadTicketPDF('${b._id}');document.getElementById('ticketViewModal').remove()">
+            ⬇️ Download PDF Ticket
+          </button>
+          <button class="tc2-btn" style="background:var(--sur2);border-color:var(--bdr);color:var(--mut)" onclick="document.getElementById('ticketViewModal').remove()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(over);
+  document.body.style.overflow = 'hidden';
+
+  // Generate QR code
+  setTimeout(() => {
+    const canvas = document.getElementById('qrCanvas_' + bookingId);
+    if (canvas && typeof QRCode !== 'undefined') {
+      QRCode.toCanvas(canvas, b.bookingReference, {
+        width: 140, margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      }, err => { if (err) console.error('QR error:', err); });
+    } else if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 140, 140);
+      ctx.fillStyle = '#000'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+      ctx.fillText(b.bookingReference, 70, 70);
+    }
+  }, 100);
+
+  // Close on overlay click
+  over.querySelector('.modal').onclick = e => e.stopPropagation();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DOWNLOAD PDF TICKET
+// ══════════════════════════════════════════════════════════════════════════════
+async function downloadTicketPDF(bookingId) {
+  const b  = myBookings.find(x => x._id === bookingId);
+  if (!b || b.bookingStatus !== 'confirmed') return;
+  const ev = b.event || {};
+  const date = ev.date || b.bookedAt;
+
+  // Generate QR code data URL
+  let qrDataURL = '';
+  if (typeof QRCode !== 'undefined') {
+    try {
+      qrDataURL = await QRCode.toDataURL(b.bookingReference, {
+        width: 200, margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      });
+    } catch (e) { console.warn('QR gen error:', e); }
+  }
+
+  // jsPDF
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('PDF library is loading. Please try again in a moment.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+
+  // Dark background
+  doc.setFillColor(10, 10, 15);
+  doc.rect(0, 0, W, H, 'F');
+
+  // Top accent bar
+  doc.setFillColor(255, 92, 53);
+  doc.rect(0, 0, W, 14, 'F');
+
+  // Logo text
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(255, 255, 255);
+  doc.text('EventSphere', W / 2, 9.5, { align: 'center' });
+
+  // Event name
+  doc.setFontSize(20);
+  doc.text((ev.emoji || '🎟') + ' ' + (ev.title || 'Event'), W / 2, 30, { align: 'center', maxWidth: W - 20 });
+
+  // Divider
+  doc.setDrawColor(255, 92, 53); doc.setLineWidth(0.5);
+  doc.line(14, 38, W - 14, 38);
+
+  // Details
+  const lx = 16; let y = 47;
+  const dim = [107, 107, 128], bright = [240, 240, 245];
+
+  const row = (lbl, val) => {
+    doc.setFontSize(7); doc.setTextColor(...dim); doc.setFont('helvetica', 'bold');
+    doc.text(lbl.toUpperCase(), lx, y);
+    doc.setFontSize(9.5); doc.setTextColor(...bright); doc.setFont('helvetica', 'normal');
+    doc.text(String(val), lx, y + 5.5);
+    y += 14;
+  };
+
+  row('Event', ev.title || '—');
+  row('Date', fmtDate(date));
+  row('Venue', ev.venue || '—');
+  row('Ticket Type', b.ticketType);
+  row('Seats', String(b.quantity));
+  row('Total Paid', '₹' + Number(b.totalAmount).toLocaleString('en-IN'));
+  row('Payment Status', (b.paymentStatus || 'paid').toUpperCase());
+
+  // Booking reference
+  y += 4;
+  doc.setDrawColor(40, 40, 60); doc.setLineWidth(0.25);
+  doc.line(lx, y, W - lx, y); y += 8;
+  doc.setFontSize(7); doc.setTextColor(...dim); doc.setFont('helvetica', 'bold');
+  doc.text('BOOKING REFERENCE', lx, y); y += 6;
+  doc.setFontSize(12); doc.setTextColor(255, 92, 53); doc.setFont('helvetica', 'bold');
+  doc.text(b.bookingReference, lx, y);
+
+  // QR code image
+  if (qrDataURL) {
+    const qx = W - 56, qy = 46;
+    doc.addImage(qrDataURL, 'PNG', qx, qy, 46, 46);
+    doc.setFontSize(6.5); doc.setTextColor(...dim); doc.setFont('helvetica', 'normal');
+    doc.text('Scan at entry', qx + 23, qy + 50, { align: 'center' });
+  }
+
+  // Footer
+  const fy = H - 10;
+  doc.setFillColor(18, 18, 28);
+  doc.rect(0, fy - 6, W, 16, 'F');
+  doc.setFontSize(7); doc.setTextColor(...dim); doc.setFont('helvetica', 'normal');
+  doc.text('Generated by EventSphere  ·  This ticket is non-transferable', W / 2, fy, { align: 'center' });
+
+  doc.save('EventSphere_Ticket_' + b.bookingReference + '.pdf');
+}
+
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // WISHLIST PAGE
@@ -851,6 +1154,21 @@ async function saveProfile() {
 syncWishCount();
 loadEvents();
 loadMyBookings();
+
+// Hash navigation support (direct linking from landing page footer/nav)
+function handleRouteHash() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && ['tickets', 'wishlist', 'browse', 'profile', 'settings'].includes(hash)) {
+    const targetNav = document.querySelector(`.ni[onclick*="${hash}"]`);
+    pg(hash, targetNav);
+  }
+}
+handleRouteHash();
+window.addEventListener('hashchange', handleRouteHash);
 </script>
+<!-- QR Code library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>
