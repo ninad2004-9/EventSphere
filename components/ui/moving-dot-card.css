@@ -1,49 +1,55 @@
-/* Styles for DotCard (moving-dot-card.tsx) */
+/* Styles for DotCard (moving-dot-card.tsx) - Compact Glassmorphism HUD */
 .outer {
-  width: 300px;
+  width: 280px;
   max-width: 100%;
-  height: 250px;
-  border-radius: 12px;
+  height: 110px;
+  border-radius: 14px;
   padding: 1px;
-  background: radial-gradient(circle 280px at 0% 0%, #ffffff22, #0c0d0d);
+  background: radial-gradient(circle 280px at 0% 0%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.04));
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
+}
+
+.outer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 85, 0, 0.16);
 }
 
 .dot {
-  width: 6px;
+  width: 5px;
   aspect-ratio: 1;
   position: absolute;
-  background-color: #ff5500;
-  box-shadow: 0 0 10px #ff5500, 0 0 20px #ff5500;
+  background-color: var(--card-accent, #ff5500);
+  box-shadow: 0 0 8px 2px var(--card-accent, #ff5500), 0 0 16px var(--card-accent, #ff5500);
   border-radius: 100px;
   z-index: 2;
-  right: 10%;
-  top: 10%;
+  right: 8px;
+  top: 6px;
   animation: moveDot 6s linear infinite;
 }
 
 @keyframes moveDot {
   0% {
-    top: 10%;
-    right: 10%;
+    top: 6px;
+    right: 8px;
   }
   25% {
-    top: 10%;
-    right: calc(100% - 35px);
+    top: 6px;
+    right: calc(100% - 13px);
   }
   50% {
-    top: calc(100% - 30px);
-    right: calc(100% - 35px);
+    top: calc(100% - 11px);
+    right: calc(100% - 13px);
   }
   75% {
-    top: calc(100% - 30px);
-    right: 10%;
+    top: calc(100% - 11px);
+    right: 8px;
   }
   100% {
-    top: 10%;
-    right: 10%;
+    top: 6px;
+    right: 8px;
   }
 }
 
@@ -51,10 +57,11 @@
   z-index: 1;
   width: 100%;
   height: 100%;
-  border-radius: 11px;
-  border: solid 1px #202222;
-  background-size: 20px 20px;
-  background: radial-gradient(circle 280px at 0% 0%, #20222a, #0c0d0d);
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(9, 10, 18, 0.40);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,68 +69,98 @@
   flex-direction: column;
   color: #fff;
   text-align: center;
-  gap: 6px;
+  padding: 10px 14px;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .ray {
-  width: 220px;
-  height: 45px;
+  width: 120px;
+  height: 28px;
   border-radius: 100px;
   position: absolute;
-  background-color: #ff5500;
-  opacity: 0.25;
-  box-shadow: 0 0 50px #ff5500;
-  filter: blur(12px);
-  transform: rotate(-40deg);
-  top: 10px;
-  left: 0;
+  background-color: var(--card-accent, #ff5500);
+  opacity: 0.14;
+  box-shadow: 0 0 35px var(--card-accent, #ff5500);
+  filter: blur(10px);
+  transform: rotate(-35deg);
+  top: -8px;
+  left: -15px;
   pointer-events: none;
 }
 
+.card-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--card-accent, #ff5500);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 2;
+  margin-bottom: 2px;
+}
+
+.card-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
 .text {
+  font-family: 'DM Sans', -apple-system, sans-serif;
   font-weight: 800;
-  font-size: 3.5rem;
-  line-height: 1.1;
-  background: linear-gradient(180deg, #ffffff 40%, #888899 100%);
+  font-size: 1.45rem;
+  line-height: 1.15;
+  background: linear-gradient(180deg, #ffffff 40%, #c1c5d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
+  position: relative;
+  z-index: 2;
 }
 
 .label {
-  font-size: 0.82rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  color: #8f92a3;
+  color: #9ea2b5;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  position: relative;
+  z-index: 2;
 }
 
 .line {
   width: 100%;
   height: 1px;
   position: absolute;
-  background-color: #2c2c2c;
+  background-color: rgba(255, 255, 255, 0.04);
   pointer-events: none;
 }
 
 .topl {
   top: 10%;
-  background: linear-gradient(90deg, #888888 30%, #1d1f1f 70%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.01) 80%);
 }
 
 .bottoml {
   bottom: 10%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.01) 20%, rgba(255, 255, 255, 0.08) 80%);
 }
 
 .leftl {
-  left: 10%;
+  left: 8%;
   width: 1px;
   height: 100%;
-  background: linear-gradient(180deg, #747474 30%, #222424 70%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.01) 80%);
 }
 
 .rightl {
-  right: 10%;
+  right: 8%;
   width: 1px;
   height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01) 20%, rgba(255, 255, 255, 0.08) 80%);
 }
